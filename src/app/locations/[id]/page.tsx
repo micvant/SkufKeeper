@@ -100,7 +100,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
         )}
 
         {location.photoPath && (
-          <div className="relative mb-6 aspect-video overflow-hidden rounded-2xl bg-slate-100">
+          <div className="relative mb-6 aspect-[16/10] max-w-2xl overflow-hidden rounded-2xl bg-slate-100">
             <Image
               src={location.photoPath}
               alt={location.name}

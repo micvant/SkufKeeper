@@ -63,7 +63,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
 
       <div className="mx-auto max-w-lg px-4 py-6 md:px-8">
         {item.photoPath ? (
-          <div className="relative mb-6 aspect-square overflow-hidden rounded-2xl bg-slate-100">
+          <div className="relative mb-6 aspect-square max-w-xs overflow-hidden rounded-2xl bg-slate-100">
             <Image
               src={item.photoPath}
               alt={item.name}

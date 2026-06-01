@@ -18,7 +18,7 @@ export function LocationCard({ location, compact = false }: LocationCardProps) {
       className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
     >
       {!compact && (
-        <div className="relative aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200">
+        <div className="relative aspect-[16/11] bg-gradient-to-br from-slate-100 to-slate-200">
           {location.photoPath ? (
             <Image
               src={location.photoPath}
@@ -96,7 +96,7 @@ export function ItemCard({ item, showLocation = false }: ItemCardProps) {
       href={`/items/${item.id}`}
       className="group flex gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
     >
-      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
         {item.photoPath ? (
           <Image src={item.photoPath} alt={item.name} fill className="object-cover" unoptimized />
         ) : (
