@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Camera, ScanLine, QrCode } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
-import { getScanPath } from "@/lib/url";
+import { getScanPath, getScanToken } from "@/lib/url";
 import { Header } from "@/components/Navigation";
 import { Button } from "@/components/ui/Button";
 
@@ -14,9 +14,22 @@ function isLiveCameraSupported(): boolean {
   return window.isSecureContext && !!navigator.mediaDevices?.getUserMedia;
 }
 
+async function resolveScanNavigation(decodedText: string): Promise<string | null> {
+  const token = getScanToken(decodedText);
+  if (token) {
+    const res = await fetch(`/api/locations/by-token/${encodeURIComponent(token)}`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { id: string };
+    return `/locations/${data.id}`;
+  }
+
+  return getScanPath(decodedText);
+}
+
 export default function ScanPage() {
   const router = useRouter();
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const navigatingRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [scanning, setScanning] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -31,14 +44,39 @@ export default function ScanPage() {
     };
   }, []);
 
-  function navigateToScanTarget(decodedText: string) {
-    const path = getScanPath(decodedText);
-    if (path) {
+  async function stopScanner() {
+    if (scannerRef.current) {
+      await scannerRef.current.stop().catch(() => {});
+      scannerRef.current = null;
+    }
+    setScanning(false);
+  }
+
+  async function navigateToScanTarget(decodedText: string) {
+    if (navigatingRef.current) return false;
+
+    setError("");
+    navigatingRef.current = true;
+
+    try {
+      await stopScanner();
+
+      const path = await resolveScanNavigation(decodedText);
+      if (!path) {
+        setError(
+          "QR-код не распознан или место не найдено. Откройте код в разделе «Все QR-коды»."
+        );
+        navigatingRef.current = false;
+        return false;
+      }
+
       router.push(path);
       return true;
+    } catch {
+      setError("Ошибка при открытии места хранения. Попробуйте ещё раз.");
+      navigatingRef.current = false;
+      return false;
     }
-    setError("QR-код не распознан. Используйте код формата skufkeeper:l/... или откройте QR в разделе «Все QR-коды».");
-    return false;
   }
 
   async function handlePhotoScan(e: React.ChangeEvent<HTMLInputElement>) {
@@ -47,13 +85,15 @@ export default function ScanPage() {
 
     setError("");
     setProcessing(true);
+    navigatingRef.current = false;
 
     try {
       const scanner = new Html5Qrcode("qr-file-scanner");
       const decodedText = await scanner.scanFile(file, false);
-      navigateToScanTarget(decodedText);
+      await navigateToScanTarget(decodedText);
     } catch {
       setError("Не удалось прочитать QR-код с фото. Попробуйте сфотографировать ближе и при хорошем освещении.");
+      navigatingRef.current = false;
     } finally {
       setProcessing(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -62,6 +102,7 @@ export default function ScanPage() {
 
   async function startScanner() {
     setError("");
+    navigatingRef.current = false;
     setScanning(true);
 
     await new Promise((resolve) => setTimeout(resolve, 150));
@@ -91,7 +132,7 @@ export default function ScanPage() {
       await scanner.start(
         cameraId,
         {
-          fps: 10,
+          fps: 8,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
             const size = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.75);
             return { width: size, height: size };
@@ -99,10 +140,7 @@ export default function ScanPage() {
           aspectRatio: 1,
         },
         (decodedText) => {
-          if (navigateToScanTarget(decodedText)) {
-            scanner.stop().catch(() => {});
-            setScanning(false);
-          }
+          void navigateToScanTarget(decodedText);
         },
         () => {}
       );
@@ -121,21 +159,9 @@ export default function ScanPage() {
     }
   }
 
-  async function stopScanner() {
-    if (scannerRef.current) {
-      await scannerRef.current.stop().catch(() => {});
-      scannerRef.current = null;
-    }
-    setScanning(false);
-  }
-
-  function handleManualOpen() {
-    const path = getScanPath(manualId);
-    if (path) {
-      router.push(path);
-    } else {
-      setError("Не удалось распознать код. Введите skufkeeper:l/... или токен из раздела «Все QR-коды».");
-    }
+  async function handleManualOpen() {
+    navigatingRef.current = false;
+    await navigateToScanTarget(manualId);
   }
 
   return (

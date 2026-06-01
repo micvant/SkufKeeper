@@ -30,7 +30,11 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
     params.then(({ id: locationId }) => {
       setId(locationId);
       fetch(`/api/locations/${locationId}`)
-        .then((res) => res.json())
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) return null;
+          return data as StorageLocation;
+        })
         .then(setLocation)
         .finally(() => setLoading(false));
     });

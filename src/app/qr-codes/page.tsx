@@ -27,8 +27,8 @@ export default function QrCodesPage() {
     if (!q) return locations;
     return locations.filter(
       (loc) =>
-        loc.name.toLowerCase().includes(q) ||
-        loc.qrToken.toLowerCase().includes(q)
+        loc.qrToken &&
+        (loc.name.toLowerCase().includes(q) || loc.qrToken.toLowerCase().includes(q))
     );
   }, [locations, query]);
 
@@ -58,7 +58,7 @@ export default function QrCodesPage() {
           <p className="text-center text-slate-500">Места не найдены</p>
         ) : (
           <div className="space-y-3">
-            {filtered.map((location) => (
+            {filtered.filter((loc) => loc.qrToken).map((location) => (
               <CollapsibleSection
                 key={location.id}
                 title={location.name}
