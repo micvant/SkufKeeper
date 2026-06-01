@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -37,6 +38,11 @@ function isActive(pathname: string, href: string): boolean {
 export function BurgerMenu() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setOpen(false);
@@ -55,6 +61,56 @@ export function BurgerMenu() {
     };
   }, [open]);
 
+  const menuPanel =
+    open && mounted ? (
+      <div className="fixed inset-0 z-[200] md:hidden" role="dialog" aria-modal="true">
+        <button
+          type="button"
+          className="absolute inset-0 bg-black/50"
+          aria-label="Закрыть меню"
+          onClick={() => setOpen(false)}
+        />
+        <nav className="absolute right-0 top-0 bottom-0 flex w-[min(85vw,300px)] flex-col bg-white shadow-2xl">
+          <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+            <div className="flex items-center gap-2">
+              <AppLogo size={32} />
+              <span className="font-bold text-slate-900">SkufKeeper</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+              aria-label="Закрыть"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <ul className="min-h-0 flex-1 overflow-y-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            {mobileNavItems.map(({ href, icon: Icon, label }) => {
+              const active = isActive(pathname, href);
+              return (
+                <li key={href} className="mb-1">
+                  <Link
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-4 py-3.5 text-base font-medium transition-colors",
+                      active
+                        ? "bg-primary-light text-primary"
+                        : "text-slate-800 hover:bg-slate-100"
+                    )}
+                  >
+                    <Icon className="h-5 w-5 shrink-0" />
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+    ) : null;
+
   return (
     <>
       <button
@@ -65,55 +121,7 @@ export function BurgerMenu() {
       >
         <Menu className="h-6 w-6" />
       </button>
-
-      {open && (
-        <div className="fixed inset-0 z-[100] md:hidden">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            aria-label="Закрыть меню"
-            onClick={() => setOpen(false)}
-          />
-          <nav className="absolute right-0 top-0 flex h-full w-[min(100%,280px)] flex-col bg-white shadow-xl safe-top safe-bottom">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <AppLogo size={32} />
-                <span className="font-bold text-slate-900">SkufKeeper</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-                aria-label="Закрыть"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <ul className="flex-1 overflow-y-auto p-3">
-              {mobileNavItems.map(({ href, icon: Icon, label }) => {
-                const active = isActive(pathname, href);
-                return (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
-                        active
-                          ? "bg-primary-light text-primary"
-                          : "text-slate-700 hover:bg-slate-50"
-                      )}
-                    >
-                      <Icon className="h-5 w-5 shrink-0" />
-                      {label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-        </div>
-      )}
+      {mounted && menuPanel ? createPortal(menuPanel, document.body) : null}
     </>
   );
 }
