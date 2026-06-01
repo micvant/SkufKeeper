@@ -1,5 +1,6 @@
 export interface StorageLocation {
   id: string;
+  qrToken: string;
   name: string;
   description: string | null;
   photoPath: string | null;

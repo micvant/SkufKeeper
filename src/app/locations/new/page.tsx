@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
+import { LocationQRCode } from "@/components/LocationQRCode";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import type { StorageLocation } from "@/types";
 
 export default function NewLocationPage() {
   const router = useRouter();
@@ -15,6 +18,7 @@ export default function NewLocationPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [created, setCreated] = useState<StorageLocation | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,12 +41,38 @@ export default function NewLocationPage() {
 
       if (!res.ok) throw new Error(data.error || "Ошибка");
 
-      router.push(`/locations/${data.id}`);
+      if (!data.qrToken) throw new Error("QR-код не был создан");
+
+      setCreated(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (created?.qrToken) {
+    return (
+      <div>
+        <Header title="Место создано" backHref="/" />
+
+        <div className="mx-auto max-w-lg space-y-5 px-4 py-6 md:px-8">
+          <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
+            <p className="text-lg font-semibold text-slate-900">{created.name}</p>
+            <p className="mt-1 text-sm text-emerald-600">Место хранения успешно добавлено</p>
+          </div>
+
+          <LocationQRCode qrToken={created.qrToken} locationName={created.name} />
+
+          <Button size="lg" onClick={() => router.push(`/locations/${created.id}`)}>
+            Перейти к месту
+          </Button>
+          <Link href="/" className="block text-center text-sm text-slate-500 hover:text-slate-700">
+            На главную
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

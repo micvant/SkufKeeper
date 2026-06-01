@@ -9,6 +9,7 @@ datasource db {
 
 model StorageLocation {
   id          String   @id @default(cuid())
+  qrToken     String   @unique
   name        String
   description String?
   photoPath   String?

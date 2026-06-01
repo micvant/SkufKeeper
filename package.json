@@ -7,7 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "prisma db push",
+    "db:push": "prisma db push && node scripts/backfill-qr-tokens.mjs",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },

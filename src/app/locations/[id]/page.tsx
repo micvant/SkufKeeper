@@ -87,12 +87,17 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               Редактировать
             </Button>
           </Link>
-          <LocationQRCode locationId={id} locationName={location.name} />
           <Button variant="danger" size="sm" onClick={handleDelete} disabled={deleting}>
             <Trash2 className="h-4 w-4" />
             {deleting ? "Удаление..." : "Удалить"}
           </Button>
         </div>
+
+        {location.qrToken && (
+          <div className="mb-6">
+            <LocationQRCode qrToken={location.qrToken} locationName={location.name} />
+          </div>
+        )}
 
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">

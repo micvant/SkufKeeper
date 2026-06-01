@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, ScanLine } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
-import { extractLocationId } from "@/lib/url";
+import { getScanPath } from "@/lib/url";
 import { Header } from "@/components/Navigation";
 import { Button } from "@/components/ui/Button";
 
@@ -30,10 +30,10 @@ export default function ScanPage() {
     };
   }, []);
 
-  function navigateToLocation(decodedText: string) {
-    const locationId = extractLocationId(decodedText);
-    if (locationId) {
-      router.push(`/locations/${locationId}`);
+  function navigateToScanTarget(decodedText: string) {
+    const path = getScanPath(decodedText);
+    if (path) {
+      router.push(path);
       return true;
     }
     setError("QR-код не распознан или не относится к месту хранения SkufKeeper");
@@ -50,7 +50,7 @@ export default function ScanPage() {
     try {
       const scanner = new Html5Qrcode("qr-file-scanner");
       const decodedText = await scanner.scanFile(file, false);
-      navigateToLocation(decodedText);
+      navigateToScanTarget(decodedText);
     } catch {
       setError("Не удалось прочитать QR-код с фото. Попробуйте сфотографировать ближе и при хорошем освещении.");
     } finally {
@@ -77,7 +77,7 @@ export default function ScanPage() {
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
-          if (navigateToLocation(decodedText)) {
+          if (navigateToScanTarget(decodedText)) {
             scanner.stop().catch(() => {});
             setScanning(false);
           }
@@ -105,11 +105,11 @@ export default function ScanPage() {
   }
 
   function handleManualOpen() {
-    const locationId = extractLocationId(manualId);
-    if (locationId) {
-      router.push(`/locations/${locationId}`);
+    const path = getScanPath(manualId);
+    if (path) {
+      router.push(path);
     } else {
-      setError("Не удалось распознать ссылку или ID места");
+      setError("Не удалось распознать ссылку или QR-код места");
     }
   }
 
@@ -183,7 +183,7 @@ export default function ScanPage() {
           <p className="mb-2 text-sm font-medium text-slate-700">Или вставьте ссылку вручную</p>
           <input
             type="text"
-            placeholder="http://.../locations/..."
+            placeholder="http://.../l/... или /locations/..."
             value={manualId}
             onChange={(e) => setManualId(e.target.value)}
             className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"

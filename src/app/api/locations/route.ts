@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { generateUniqueQrToken } from "@/lib/qr-token";
 import { saveUploadedFile } from "@/lib/upload";
 
 export async function GET() {
@@ -29,8 +30,10 @@ export async function POST(request: NextRequest) {
       photoPath = await saveUploadedFile(photo);
     }
 
+    const qrToken = await generateUniqueQrToken();
+
     const location = await prisma.storageLocation.create({
-      data: { name, description, photoPath },
+      data: { name, description, photoPath, qrToken },
       include: { _count: { select: { items: true } } },
     });
 
