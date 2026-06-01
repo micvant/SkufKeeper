@@ -15,6 +15,7 @@ export UPLOAD_DIR="${UPLOAD_DIR:-$DATA_DIR/uploads}"
 
 echo "Using DATABASE_URL=$DATABASE_URL"
 echo "Uploads: $UPLOAD_DIR"
+echo "Build: $(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
 
 npx prisma db push
 node scripts/backfill-qr-tokens.mjs 2>/dev/null || true

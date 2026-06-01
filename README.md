@@ -57,6 +57,14 @@ npm run dev
 4. **Удалите** кастомный Start Command в UI — используется `railway.toml`
 5. **Redeploy**
 
+### Если изменения с GitHub не появляются на сайте
+
+1. **Проверьте деплой:** Railway → сервис → **Deployments** — последний должен быть зелёным и свежим (после вашего push).
+2. **Ручной перезапуск:** Deployments → **⋯** у последнего деплоя → **Redeploy**.
+3. **Источник кода:** Settings → **Source** — репозиторий `micvant/SkufKeeper`, ветка `main`, авто-деплой включён.
+4. **GitHub Actions (рекомендуется):** добавьте секреты `RAILWAY_TOKEN` и `RAILWAY_SERVICE_ID` — см. `.github/workflows/deploy-railway.yml`. После этого каждый push в `main` будет деплоить принудительно.
+5. В логах деплоя при старте должна быть строка `Build: 3f51525` (короткий hash коммита).
+
 ## Стек
 
 - Next.js 15 + React 19
