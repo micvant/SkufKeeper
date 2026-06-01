@@ -9,12 +9,12 @@ else
 fi
 
 mkdir -p "$DATA_DIR/uploads"
-ln -sfn "$DATA_DIR/uploads" public/uploads
 
 export DATABASE_URL="${DATABASE_URL:-file:${DATA_DIR}/dev.db}"
+export UPLOAD_DIR="${UPLOAD_DIR:-$DATA_DIR/uploads}"
 
 echo "Using DATABASE_URL=$DATABASE_URL"
-echo "Uploads: $DATA_DIR/uploads"
+echo "Uploads: $UPLOAD_DIR"
 
 npx prisma db push
 node scripts/backfill-qr-tokens.mjs 2>/dev/null || true
