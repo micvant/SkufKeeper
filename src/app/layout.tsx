@@ -12,6 +12,10 @@ export const metadata: Metadata = {
     title: "SkufKeeper",
   },
   icons: {
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: "/icons/apple-touch-icon.png",
   },
 };
@@ -21,7 +25,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#059669",
+  themeColor: "#5c4033",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

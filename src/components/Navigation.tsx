@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Search, Plus, QrCode, BarChart3, ScanLine } from "lucide-react";
+import { AppLogo } from "@/components/AppLogo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -62,9 +63,7 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-slate-200 md:bg-white">
       <div className="flex items-center gap-2 border-b border-slate-200 px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-sm">
-          SK
-        </div>
+        <AppLogo size={40} />
         <div>
           <h1 className="font-bold text-slate-900">SkufKeeper</h1>
           <p className="text-xs text-slate-500">Инвентаризация</p>
