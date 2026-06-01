@@ -1,9 +1,9 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { getClientBaseUrl } from "@/lib/url";
 
 interface LocationQRCodeProps {
   qrToken: string;
@@ -11,13 +11,47 @@ interface LocationQRCodeProps {
   showLabel?: boolean;
 }
 
+function resolveClientBaseUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (envUrl) return envUrl;
+
+  if (typeof window !== "undefined") {
+    const { hostname, origin } = window.location;
+    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+      return origin;
+    }
+  }
+
+  return "";
+}
+
 export function LocationQRCode({ qrToken, locationName, showLabel = true }: LocationQRCodeProps) {
-  const qrSrc = `/api/qr/${qrToken}`;
-  const scanUrl = `${getClientBaseUrl()}/l/${qrToken}`;
+  const [baseUrl, setBaseUrl] = useState(resolveClientBaseUrl);
+  const scanUrl = baseUrl ? `${baseUrl}/l/${qrToken}` : "";
+  const qrSrc = useMemo(
+    () =>
+      baseUrl
+        ? `/api/qr/${qrToken}?base=${encodeURIComponent(baseUrl)}`
+        : `/api/qr/${qrToken}`,
+    [baseUrl, qrToken]
+  );
+
+  useEffect(() => {
+    if (baseUrl) return;
+
+    fetch("/api/config")
+      .then((res) => res.json())
+      .then((data: { baseUrl?: string }) => {
+        if (data.baseUrl) setBaseUrl(data.baseUrl);
+      })
+      .catch(() => {});
+  }, [baseUrl]);
 
   function handleDownload() {
     const link = document.createElement("a");
-    link.href = qrSrc;
+    link.href = baseUrl
+      ? `/api/qr/${qrToken}?base=${encodeURIComponent(baseUrl)}`
+      : `/api/qr/${qrToken}`;
     link.download = `skufkeeper-${locationName.replace(/\s+/g, "-")}.png`;
     link.click();
   }
@@ -43,7 +77,9 @@ export function LocationQRCode({ qrToken, locationName, showLabel = true }: Loca
         />
       </div>
 
-      <p className="mt-3 break-all text-center text-xs text-slate-400">{scanUrl}</p>
+      {scanUrl && (
+        <p className="mt-3 break-all text-center text-xs text-slate-400">{scanUrl}</p>
+      )}
 
       <div className="mt-4 flex justify-center">
         <Button variant="secondary" size="sm" type="button" onClick={handleDownload}>
