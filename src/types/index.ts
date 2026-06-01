@@ -5,6 +5,7 @@ export interface StorageLocation {
   description: string | null;
   photoPath: string | null;
   iconName: string | null;
+  color: string | null;
   parentId: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;

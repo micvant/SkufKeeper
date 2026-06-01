@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
-import { IconPicker } from "@/components/IconPicker";
+import { LocationAppearanceFields } from "@/components/LocationAppearanceFields";
 import { LocationQRCode } from "@/components/LocationQRCode";
 import { Input } from "@/components/ui/Input";
+import type { LocationColorSlug } from "@/lib/colors";
 import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +20,7 @@ export default function NewLocationPage() {
   const [description, setDescription] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [iconName, setIconName] = useState<IconName | null>(null);
+  const [color, setColor] = useState<LocationColorSlug | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [created, setCreated] = useState<StorageLocation | null>(null);
@@ -38,7 +40,10 @@ export default function NewLocationPage() {
       formData.append("name", name.trim());
       if (description.trim()) formData.append("description", description.trim());
       if (photo) formData.append("photo", photo);
-      else if (iconName) formData.append("iconName", iconName);
+      else {
+        if (iconName) formData.append("iconName", iconName);
+        if (color) formData.append("color", color);
+      }
 
       const res = await fetch("/api/locations", { method: "POST", body: formData });
       const data = await res.json();
@@ -104,7 +109,12 @@ export default function NewLocationPage() {
         <PhotoUpload onPhotoChange={setPhoto} label="Фото места" />
 
         {!photo && (
-          <IconPicker value={iconName} onChange={setIconName} variant="location" />
+          <LocationAppearanceFields
+            iconName={iconName}
+            color={color}
+            onIconChange={setIconName}
+            onColorChange={setColor}
+          />
         )}
 
         {error && (

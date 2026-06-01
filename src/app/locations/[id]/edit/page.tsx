@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
-import { IconPicker } from "@/components/IconPicker";
+import { LocationAppearanceFields } from "@/components/LocationAppearanceFields";
 import { Input } from "@/components/ui/Input";
+import { isValidLocationColor, type LocationColorSlug } from "@/lib/colors";
 import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +21,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
   const [photo, setPhoto] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
   const [iconName, setIconName] = useState<IconName | null>(null);
+  const [color, setColor] = useState<LocationColorSlug | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
@@ -34,6 +36,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
           setDescription(data.description || "");
           setCurrentPhoto(data.photoPath);
           setIconName(data.iconName && isValidIconName(data.iconName) ? data.iconName : null);
+          setColor(data.color && isValidLocationColor(data.color) ? data.color : null);
         })
         .finally(() => setFetching(false));
     });
@@ -57,6 +60,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
       if (removePhoto) formData.append("removePhoto", "true");
       if (!photo && (!currentPhoto || removePhoto)) {
         formData.append("iconName", iconName ?? "");
+        formData.append("color", color ?? "");
       }
 
       const res = await fetch(`/api/locations/${id}`, { method: "PUT", body: formData });
@@ -109,7 +113,12 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
         />
 
         {showIconPicker && (
-          <IconPicker value={iconName} onChange={setIconName} variant="location" />
+          <LocationAppearanceFields
+            iconName={iconName}
+            color={color}
+            onIconChange={setIconName}
+            onColorChange={setColor}
+          />
         )}
 
         {error && (

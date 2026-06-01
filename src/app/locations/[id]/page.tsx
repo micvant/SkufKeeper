@@ -10,6 +10,7 @@ import { ItemCard, LocationCard } from "@/components/Cards";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { LocationQRCode } from "@/components/LocationQRCode";
 import { EntityIcon } from "@/components/EntityIcon";
+import { getLocationColorStyles } from "@/lib/colors";
 import { DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import type { StorageLocation } from "@/types";
@@ -137,11 +138,14 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
             />
           </div>
         ) : (
-          <div className="mb-6 flex aspect-[16/10] max-w-2xl items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200">
+          <div
+            className={`mb-6 flex aspect-[16/10] max-w-2xl items-center justify-center rounded-2xl ${getLocationColorStyles(location.color).bg}`}
+          >
             <EntityIcon
               iconName={location.iconName}
               fallback={DEFAULT_LOCATION_ICON}
-              iconClassName="h-20 w-20 text-emerald-400"
+              colorSlug={location.color}
+              iconClassName="h-16 w-16"
             />
           </div>
         )}

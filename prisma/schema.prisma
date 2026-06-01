@@ -14,6 +14,7 @@ model StorageLocation {
   description String?
   photoPath   String?
   iconName    String?
+  color       String?
   parentId    String?
   parent      StorageLocation?  @relation("LocationTree", fields: [parentId], references: [id], onDelete: Cascade)
   children    StorageLocation[] @relation("LocationTree")

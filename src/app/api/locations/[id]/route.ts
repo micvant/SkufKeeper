@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { collectDescendantIds } from "@/lib/location-tree";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
+import { parseColorField } from "@/lib/color-field";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -43,6 +44,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const photo = formData.get("photo") as File | null;
     const removePhoto = formData.get("removePhoto") === "true";
     const iconNameInput = parseIconField(formData.get("iconName"));
+    const colorInput = parseColorField(formData.get("color"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
@@ -50,6 +52,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     let photoPath = existing.photoPath;
     let iconName = iconNameInput ?? existing.iconName;
+    let color = colorInput ?? existing.color;
 
     if (removePhoto && photoPath) {
       await deleteUploadedFile(photoPath);
@@ -64,9 +67,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
       iconName = iconNameInput;
     }
 
+    if (!photoPath && formData.has("color")) {
+      color = colorInput;
+    }
+
     const location = await prisma.storageLocation.update({
       where: { id },
-      data: { name, description, photoPath, iconName },
+      data: { name, description, photoPath, iconName, color },
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },

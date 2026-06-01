@@ -20,23 +20,23 @@ function LocationThumb({
 }) {
   const box = size === "sm" ? "h-10 w-10 rounded-lg" : "h-11 w-11 rounded-xl";
   const icon = size === "sm" ? "h-4 w-4" : "h-5 w-5";
-
   return (
-    <div className={`relative shrink-0 overflow-hidden bg-slate-100 ${box}`}>
+    <div className={`relative shrink-0 overflow-hidden ${box}`}>
       {location.photoPath ? (
         <Image
           src={location.photoPath}
           alt=""
           fill
-          className="object-cover"
+          className="object-cover bg-slate-100"
           unoptimized
         />
       ) : (
         <EntityIcon
           iconName={location.iconName}
           fallback={DEFAULT_LOCATION_ICON}
-          className="h-full w-full bg-emerald-50"
-          iconClassName={`${icon} text-emerald-600`}
+          colorSlug={location.color}
+          className="h-full w-full"
+          iconClassName={icon}
         />
       )}
     </div>
