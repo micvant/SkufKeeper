@@ -2,21 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Plus, QrCode, BarChart3, ScanLine } from "lucide-react";
+import { Home, Search, Plus, QrCode, BarChart3, ScanLine, Settings } from "lucide-react";
 import { AppLogo } from "@/components/AppLogo";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", icon: Home, label: "Главная" },
-  { href: "/stats", icon: BarChart3, label: "Статистика" },
   { href: "/search", icon: Search, label: "Поиск" },
   { href: "/scan", icon: ScanLine, label: "Сканер" },
   { href: "/locations/new", icon: Plus, label: "Добавить" },
+  { href: "/settings", icon: Settings, label: "Настройки" },
 ];
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   if (href === "/locations/new") return pathname === "/locations/new";
+  if (href === "/settings") return pathname === "/settings";
   return pathname.startsWith(href);
 }
 
@@ -35,7 +36,7 @@ export function BottomNav() {
               href={href}
               className={cn(
                 "flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1 text-[10px] font-medium transition-colors",
-                active ? "text-emerald-600" : "text-slate-500 hover:text-slate-700"
+                active ? "text-primary" : "text-slate-500 hover:text-slate-700"
               )}
             >
               <Icon className={cn("h-5 w-5 shrink-0", active && "stroke-[2.5]")} />
@@ -58,6 +59,7 @@ export function Sidebar() {
     { href: "/qr-codes", icon: QrCode, label: "QR-коды" },
     { href: "/scan", icon: ScanLine, label: "Сканер QR" },
     { href: "/locations/new", icon: Plus, label: "Новое место" },
+    { href: "/settings", icon: Settings, label: "Настройки" },
   ];
 
   return (
@@ -80,7 +82,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-emerald-50 text-emerald-700"
+                  ? "bg-primary-light text-primary"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               )}
             >

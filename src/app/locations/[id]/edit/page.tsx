@@ -10,6 +10,7 @@ import { isValidLocationColor, type LocationColorSlug } from "@/lib/colors";
 import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { LocationParentSelect } from "@/components/LocationParentSelect";
 import type { StorageLocation } from "@/types";
 
 export default function EditLocationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +26,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const [parentId, setParentId] = useState<string | null>(null);
 
   useEffect(() => {
     params.then(({ id: locationId }) => {
@@ -37,6 +39,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
           setCurrentPhoto(data.photoPath);
           setIconName(data.iconName && isValidIconName(data.iconName) ? data.iconName : null);
           setColor(data.color && isValidLocationColor(data.color) ? data.color : null);
+          setParentId(data.parentId);
         })
         .finally(() => setFetching(false));
     });
@@ -118,6 +121,18 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
             color={color}
             onIconChange={setIconName}
             onColorChange={setColor}
+          />
+        )}
+
+        {id && (
+          <LocationParentSelect
+            locationId={id}
+            currentParentId={parentId}
+            onMoved={() => {
+              fetch(`/api/locations/${id}`)
+                .then((res) => res.json())
+                .then((data: StorageLocation) => setParentId(data.parentId));
+            }}
           />
         )}
 

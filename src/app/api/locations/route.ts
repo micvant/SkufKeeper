@@ -8,11 +8,26 @@ import { parseColorField } from "@/lib/color-field";
 export async function GET(request: NextRequest) {
   const parentId = request.nextUrl.searchParams.get("parentId");
   const all = request.nextUrl.searchParams.get("all") === "true";
+  const query = request.nextUrl.searchParams.get("q")?.trim();
+
+  if (query) {
+    const locations = await prisma.storageLocation.findMany({
+      where: { name: { contains: query } },
+      include: {
+        _count: { select: { items: true, children: true } },
+        parent: { select: { id: true, name: true } },
+      },
+      orderBy: { name: "asc" },
+      take: 30,
+    });
+    return NextResponse.json(locations);
+  }
 
   const locations = await prisma.storageLocation.findMany({
     where: all ? undefined : parentId ? { parentId } : { parentId: null },
     include: {
       _count: { select: { items: true, children: true } },
+      ...(all ? { parent: { select: { id: true, name: true } } } : {}),
     },
     orderBy: all ? { name: "asc" } : { updatedAt: "desc" },
   });

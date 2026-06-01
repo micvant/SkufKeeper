@@ -9,6 +9,7 @@ import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { LocationQRCode } from "@/components/LocationQRCode";
+import { LocationParentSelect } from "@/components/LocationParentSelect";
 import { EntityIcon } from "@/components/EntityIcon";
 import { getLocationColorStyles } from "@/lib/colors";
 import { DEFAULT_LOCATION_ICON } from "@/lib/icons";
@@ -121,7 +122,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
         {location.parent && (
           <Link
             href={`/locations/${location.parent.id}`}
-            className="mb-4 inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700"
+            className="mb-4 inline-flex items-center gap-1 text-sm text-primary hover:opacity-80"
           >
             ← {location.parent.name}
           </Link>
@@ -177,31 +178,27 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
 
-        <div className="space-y-3">
-          {location.qrToken && (
-            <CollapsibleSection
-              title={
-                <span className="inline-flex items-center gap-2">
-                  <QrCode className="h-4 w-4 text-emerald-600" />
-                  QR-код
-                </span>
-              }
-              open={sections.qr}
-              onOpenChange={(open) => setSection("qr", open)}
-            >
-              <LocationQRCode
-                qrToken={location.qrToken}
-                locationName={location.name}
-                showLabel={false}
-                embedded
-              />
-            </CollapsibleSection>
-          )}
+        <div className="mb-6">
+          <LocationParentSelect
+            locationId={id}
+            currentParentId={location.parentId}
+            onMoved={() => {
+              fetch(`/api/locations/${id}`)
+                .then(async (res) => {
+                  const data = await res.json();
+                  if (!res.ok) return null;
+                  return data as StorageLocation;
+                })
+                .then((data) => data && setLocation(data));
+            }}
+          />
+        </div>
 
+        <div className="space-y-3">
           <CollapsibleSection
             title={
               <span className="inline-flex items-center gap-2">
-                <FolderOpen className="h-4 w-4 text-emerald-600" />
+                <FolderOpen className="h-4 w-4 text-primary" />
                 Вложенные места
               </span>
             }
@@ -242,7 +239,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
           <CollapsibleSection
             title={
               <span className="inline-flex items-center gap-2">
-                <Package className="h-4 w-4 text-emerald-600" />
+                <Package className="h-4 w-4 text-primary" />
                 Объекты
               </span>
             }
@@ -281,6 +278,26 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               </div>
             )}
           </CollapsibleSection>
+
+          {location.qrToken && (
+            <CollapsibleSection
+              title={
+                <span className="inline-flex items-center gap-2">
+                  <QrCode className="h-4 w-4 text-primary" />
+                  QR-код
+                </span>
+              }
+              open={sections.qr}
+              onOpenChange={(open) => setSection("qr", open)}
+            >
+              <LocationQRCode
+                qrToken={location.qrToken}
+                locationName={location.name}
+                showLabel={false}
+                embedded
+              />
+            </CollapsibleSection>
+          )}
         </div>
       </div>
     </div>

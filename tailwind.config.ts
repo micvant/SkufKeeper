@@ -10,7 +10,17 @@ const config: Config = {
   ],
   safelist: LOCATION_COLOR_CLASSNAMES,
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: "rgb(var(--sk-primary) / <alpha-value>)",
+          hover: "rgb(var(--sk-primary-hover) / <alpha-value>)",
+          light: "rgb(var(--sk-primary-light) / <alpha-value>)",
+          muted: "rgb(var(--sk-primary-muted) / <alpha-value>)",
+          foreground: "rgb(var(--sk-primary-text) / <alpha-value>)",
+        },
+      },
+    },
   },
   plugins: [],
 };

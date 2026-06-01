@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Camera, ScanLine, QrCode } from "lucide-react";
+import { ScanLine, QrCode, Search } from "lucide-react";
 import { Html5Qrcode } from "html5-qrcode";
 import { getScanPath, getScanToken } from "@/lib/url";
 import { Header } from "@/components/Navigation";
 import { Button } from "@/components/ui/Button";
+import type { StorageLocation } from "@/types";
 
 function isLiveCameraSupported(): boolean {
   if (typeof window === "undefined") return false;
@@ -30,12 +31,12 @@ export default function ScanPage() {
   const router = useRouter();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const navigatingRef = useRef(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [scanning, setScanning] = useState(false);
-  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
-  const [manualId, setManualId] = useState("");
   const [liveCameraAvailable, setLiveCameraAvailable] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<StorageLocation[]>([]);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     setLiveCameraAvailable(isLiveCameraSupported());
@@ -43,6 +44,24 @@ export default function ScanPage() {
       scannerRef.current?.stop().catch(() => {});
     };
   }, []);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setSearching(true);
+      fetch(`/api/locations?q=${encodeURIComponent(searchQuery.trim())}`)
+        .then((res) => res.json())
+        .then((data: StorageLocation[]) => setSearchResults(Array.isArray(data) ? data : []))
+        .catch(() => setSearchResults([]))
+        .finally(() => setSearching(false));
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   async function stopScanner() {
     if (scannerRef.current) {
@@ -63,9 +82,7 @@ export default function ScanPage() {
 
       const path = await resolveScanNavigation(decodedText);
       if (!path) {
-        setError(
-          "QR-код не распознан или место не найдено. Откройте код в разделе «Все QR-коды»."
-        );
+        setError("QR-код не распознан или место не найдено.");
         navigatingRef.current = false;
         return false;
       }
@@ -76,27 +93,6 @@ export default function ScanPage() {
       setError("Ошибка при открытии места хранения. Попробуйте ещё раз.");
       navigatingRef.current = false;
       return false;
-    }
-  }
-
-  async function handlePhotoScan(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setError("");
-    setProcessing(true);
-    navigatingRef.current = false;
-
-    try {
-      const scanner = new Html5Qrcode("qr-file-scanner");
-      const decodedText = await scanner.scanFile(file, false);
-      await navigateToScanTarget(decodedText);
-    } catch {
-      setError("Не удалось прочитать QR-код с фото. Попробуйте сфотографировать ближе и при хорошем освещении.");
-      navigatingRef.current = false;
-    } finally {
-      setProcessing(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
 
@@ -148,20 +144,11 @@ export default function ScanPage() {
       setScanning(false);
       const message = err instanceof Error ? err.message : String(err);
       if (message.includes("NotAllowedError") || message.includes("Permission")) {
-        setError("Доступ к камере запрещён. Разрешите камеру для Safari в Настройки → Safari → Камера.");
-      } else if (/iPhone|iPad|iOS/i.test(navigator.userAgent)) {
-        setError(
-          "На iPhone надёжнее «Сфотографировать QR-код». Живой сканер использует видеопоток и может работать нестабильно."
-        );
+        setError("Доступ к камере запрещён. Разрешите камеру в настройках браузера.");
       } else {
-        setError("Не удалось открыть камеру. Попробуйте сфотографировать QR-код.");
+        setError("Не удалось открыть камеру.");
       }
     }
-  }
-
-  async function handleManualOpen() {
-    navigatingRef.current = false;
-    await navigateToScanTarget(manualId);
   }
 
   return (
@@ -179,55 +166,33 @@ export default function ScanPage() {
         </div>
 
         <p className="mb-4 text-sm text-slate-600">
-          Отсканируйте QR-код места хранения. Коды не зависят от домена сайта.
+          Отсканируйте QR-код места хранения или найдите место по названию.
         </p>
 
-        <div id="qr-file-scanner" className="hidden" aria-hidden="true" />
-
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <p className="text-sm font-medium text-emerald-900">Сфотографировать QR-код</p>
-          <p className="mt-1 text-xs text-emerald-700">Рекомендуется для iPhone</p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={handlePhotoScan}
-          />
-          <Button
-            className="mt-4 w-full"
-            disabled={processing}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Camera className="h-4 w-4" />
-            {processing ? "Распознавание..." : "Сфотографировать QR-код"}
-          </Button>
-        </div>
-
         {liveCameraAvailable && (
-          <div className="mt-4">
+          <div>
             <div
               id="qr-reader"
               className={`qr-reader overflow-hidden rounded-2xl bg-black ${scanning ? "block min-h-[280px]" : "hidden"}`}
             />
 
             {!scanning ? (
-              <Button variant="secondary" className="mt-4 w-full" onClick={startScanner}>
+              <Button className="w-full" onClick={startScanner}>
                 <ScanLine className="h-4 w-4" />
-                Сканировать в реальном времени
+                Сканировать QR-код
               </Button>
             ) : (
-              <>
-                <p className="mt-2 text-center text-xs text-slate-500">
-                  Наведите камеру на QR-код. Это режим видео — на iPhone лучше использовать фото выше.
-                </p>
-                <Button variant="secondary" className="mt-3 w-full" onClick={stopScanner}>
-                  Остановить
-                </Button>
-              </>
+              <Button variant="secondary" className="mt-3 w-full" onClick={stopScanner}>
+                Остановить
+              </Button>
             )}
           </div>
+        )}
+
+        {!liveCameraAvailable && (
+          <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Камера доступна только по HTTPS. Используйте поиск по названию ниже.
+          </p>
         )}
 
         {error && (
@@ -235,17 +200,44 @@ export default function ScanPage() {
         )}
 
         <div className="mt-8 border-t border-slate-200 pt-6">
-          <p className="mb-2 text-sm font-medium text-slate-700">Или введите код вручную</p>
+          <p className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+            <Search className="h-4 w-4" />
+            Поиск по названию места
+          </p>
           <input
-            type="text"
-            placeholder="skufkeeper:l/abc123..."
-            value={manualId}
-            onChange={(e) => setManualId(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            type="search"
+            placeholder="Например: Шкаф, Кристалл..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
-          <Button variant="secondary" className="mt-3 w-full" onClick={handleManualOpen}>
-            Открыть место
-          </Button>
+
+          {searching && (
+            <p className="mt-2 text-xs text-slate-500">Поиск...</p>
+          )}
+
+          {!searching && searchQuery.trim() && searchResults.length === 0 && (
+            <p className="mt-2 text-sm text-slate-500">Места не найдены</p>
+          )}
+
+          {searchResults.length > 0 && (
+            <ul className="mt-3 space-y-2">
+              {searchResults.map((loc) => (
+                <li key={loc.id}>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/locations/${loc.id}`)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition-colors hover:border-primary hover:bg-primary-light"
+                  >
+                    <p className="font-medium text-slate-900">{loc.name}</p>
+                    {loc.parent && (
+                      <p className="mt-0.5 text-xs text-slate-500">в «{loc.parent.name}»</p>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>

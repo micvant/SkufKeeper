@@ -6,6 +6,47 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+:root,
+[data-app-theme="emerald"] {
+  --sk-primary: 5 150 105;
+  --sk-primary-hover: 4 120 87;
+  --sk-primary-light: 236 253 245;
+  --sk-primary-muted: 209 250 229;
+  --sk-primary-text: 4 120 87;
+}
+
+[data-app-theme="brown"] {
+  --sk-primary: 120 53 15;
+  --sk-primary-hover: 92 40 12;
+  --sk-primary-light: 255 251 235;
+  --sk-primary-muted: 254 243 199;
+  --sk-primary-text: 120 53 15;
+}
+
+[data-app-theme="blue"] {
+  --sk-primary: 37 99 235;
+  --sk-primary-hover: 29 78 216;
+  --sk-primary-light: 239 246 255;
+  --sk-primary-muted: 219 234 254;
+  --sk-primary-text: 29 78 216;
+}
+
+[data-app-theme="violet"] {
+  --sk-primary: 124 58 237;
+  --sk-primary-hover: 109 40 217;
+  --sk-primary-light: 245 243 255;
+  --sk-primary-muted: 237 233 254;
+  --sk-primary-text: 109 40 217;
+}
+
+[data-app-theme="slate"] {
+  --sk-primary: 71 85 105;
+  --sk-primary-hover: 51 65 85;
+  --sk-primary-light: 248 250 252;
+  --sk-primary-muted: 241 245 249;
+  --sk-primary-text: 51 65 85;
+}
+
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

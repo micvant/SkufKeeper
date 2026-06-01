@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Sidebar, BottomNav } from "@/components/Navigation";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "SkufKeeper — Инвентаризация",
@@ -30,15 +31,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
+    <html lang="ru" data-app-theme="emerald" suppressHydrationWarning>
       <body className="min-h-dvh">
-        <div className="flex min-h-dvh">
-          <Sidebar />
-          <div className="flex flex-1 flex-col">
-            <main className="flex-1 pb-20 md:pb-0">{children}</main>
-            <BottomNav />
+        <ThemeProvider>
+          <div className="flex min-h-dvh">
+            <Sidebar />
+            <div className="flex flex-1 flex-col">
+              <main className="flex-1 pb-20 md:pb-0">{children}</main>
+              <BottomNav />
+            </div>
           </div>
-        </div>
+        </ThemeProvider>
       </body>
     </html>
   );
