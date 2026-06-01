@@ -9,6 +9,7 @@ interface LocationQRCodeProps {
   qrToken: string;
   locationName: string;
   showLabel?: boolean;
+  embedded?: boolean;
 }
 
 function resolveClientBaseUrl(): string {
@@ -25,7 +26,12 @@ function resolveClientBaseUrl(): string {
   return "";
 }
 
-export function LocationQRCode({ qrToken, locationName, showLabel = true }: LocationQRCodeProps) {
+export function LocationQRCode({
+  qrToken,
+  locationName,
+  showLabel = true,
+  embedded = false,
+}: LocationQRCodeProps) {
   const [baseUrl, setBaseUrl] = useState(resolveClientBaseUrl);
   const scanUrl = baseUrl ? `${baseUrl}/l/${qrToken}` : "";
   const qrSrc = useMemo(
@@ -57,7 +63,13 @@ export function LocationQRCode({ qrToken, locationName, showLabel = true }: Loca
   }
 
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5">
+    <div
+      className={
+        embedded
+          ? undefined
+          : "rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5"
+      }
+    >
       {showLabel && (
         <>
           <p className="text-sm font-medium text-slate-900">QR-код места хранения</p>

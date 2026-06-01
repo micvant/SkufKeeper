@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, FolderOpen, QrCode, Package, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
 import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { LocationQRCode } from "@/components/LocationQRCode";
 import { Button } from "@/components/ui/Button";
 import type { StorageLocation } from "@/types";
+
+type SectionKey = "qr" | "children" | "items";
 
 export default function LocationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -17,6 +20,11 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
   const [location, setLocation] = useState<StorageLocation | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [sections, setSections] = useState<Record<SectionKey, boolean>>({
+    qr: false,
+    children: false,
+    items: false,
+  });
 
   useEffect(() => {
     params.then(({ id: locationId }) => {
@@ -27,6 +35,18 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
         .finally(() => setLoading(false));
     });
   }, [params]);
+
+  function setSection(key: SectionKey, open: boolean) {
+    setSections((prev) => ({ ...prev, [key]: open }));
+  }
+
+  function expandAllSections() {
+    setSections({ qr: true, children: true, items: true });
+  }
+
+  function collapseAllSections() {
+    setSections({ qr: false, children: false, items: false });
+  }
 
   async function handleDelete() {
     const hasChildren = (location?.children?.length ?? 0) > 0;
@@ -95,7 +115,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
           <p className="mb-6 text-slate-600">{location.description}</p>
         )}
 
-        <div className="mb-6 flex flex-wrap items-start gap-2">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
           <Link href={`/locations/${id}/edit`}>
             <Button variant="secondary" size="sm">
               <Pencil className="h-4 w-4" />
@@ -106,77 +126,118 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
             <Trash2 className="h-4 w-4" />
             {deleting ? "Удаление..." : "Удалить"}
           </Button>
-        </div>
-
-        {location.qrToken && (
-          <div className="mb-6">
-            <LocationQRCode qrToken={location.qrToken} locationName={location.name} />
-          </div>
-        )}
-
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <FolderOpen className="h-5 w-5 text-emerald-600" />
-            Вложенные места ({location.children?.length ?? 0})
-          </h2>
-          <Link href={`/locations/${id}/children/new`}>
-            <Button size="sm" variant="secondary">
-              <Plus className="h-4 w-4" />
-              Добавить
+          <div className="ml-auto flex gap-2">
+            <Button variant="ghost" size="sm" type="button" onClick={expandAllSections}>
+              <ChevronsUpDown className="h-4 w-4" />
+              Развернуть
             </Button>
-          </Link>
-        </div>
-
-        {location.children && location.children.length > 0 ? (
-          <div className="mb-8 grid gap-3 sm:grid-cols-2">
-            {location.children.map((child) => (
-              <LocationCard key={child.id} location={child} compact />
-            ))}
-          </div>
-        ) : (
-          <div className="mb-8 rounded-2xl border-2 border-dashed border-slate-200 bg-white p-6 text-center">
-            <p className="text-sm text-slate-500">Нет вложенных мест</p>
-            <p className="mt-1 text-xs text-slate-400">
-              Например: полка, ящик или отделение внутри шкафа
-            </p>
-            <Link href={`/locations/${id}/children/new`} className="mt-4 inline-block">
-              <Button size="sm" variant="secondary">
-                <Plus className="h-4 w-4" />
-                Добавить место
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Объекты ({location.items?.length ?? 0})
-          </h2>
-          <Link href={`/locations/${id}/items/new`}>
-            <Button size="sm">
-              <Plus className="h-4 w-4" />
-              Добавить
+            <Button variant="ghost" size="sm" type="button" onClick={collapseAllSections}>
+              <ChevronsDownUp className="h-4 w-4" />
+              Свернуть
             </Button>
-          </Link>
+          </div>
         </div>
 
-        {!location.items?.length ? (
-          <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center">
-            <p className="text-sm text-slate-500">Здесь пока ничего нет</p>
-            <Link href={`/locations/${id}/items/new`} className="mt-4 inline-block">
-              <Button size="sm">
-                <Plus className="h-4 w-4" />
-                Добавить объект
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {location.items.map((item) => (
-              <ItemCard key={item.id} item={item} />
-            ))}
-          </div>
-        )}
+        <div className="space-y-3">
+          {location.qrToken && (
+            <CollapsibleSection
+              title={
+                <span className="inline-flex items-center gap-2">
+                  <QrCode className="h-4 w-4 text-emerald-600" />
+                  QR-код
+                </span>
+              }
+              open={sections.qr}
+              onOpenChange={(open) => setSection("qr", open)}
+            >
+              <LocationQRCode
+                qrToken={location.qrToken}
+                locationName={location.name}
+                showLabel={false}
+                embedded
+              />
+            </CollapsibleSection>
+          )}
+
+          <CollapsibleSection
+            title={
+              <span className="inline-flex items-center gap-2">
+                <FolderOpen className="h-4 w-4 text-emerald-600" />
+                Вложенные места
+              </span>
+            }
+            count={location.children?.length ?? 0}
+            open={sections.children}
+            onOpenChange={(open) => setSection("children", open)}
+            actions={
+              <Link href={`/locations/${id}/children/new`}>
+                <Button size="sm" variant="secondary">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Добавить</span>
+                </Button>
+              </Link>
+            }
+          >
+            {location.children && location.children.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {location.children.map((child) => (
+                  <LocationCard key={child.id} location={child} compact />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
+                <p className="text-sm text-slate-500">Нет вложенных мест</p>
+                <p className="mt-1 text-xs text-slate-400">
+                  Например: полка, ящик или отделение внутри шкафа
+                </p>
+                <Link href={`/locations/${id}/children/new`} className="mt-4 inline-block">
+                  <Button size="sm" variant="secondary">
+                    <Plus className="h-4 w-4" />
+                    Добавить место
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </CollapsibleSection>
+
+          <CollapsibleSection
+            title={
+              <span className="inline-flex items-center gap-2">
+                <Package className="h-4 w-4 text-emerald-600" />
+                Объекты
+              </span>
+            }
+            count={location.items?.length ?? 0}
+            open={sections.items}
+            onOpenChange={(open) => setSection("items", open)}
+            actions={
+              <Link href={`/locations/${id}/items/new`}>
+                <Button size="sm">
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Добавить</span>
+                </Button>
+              </Link>
+            }
+          >
+            {!location.items?.length ? (
+              <div className="rounded-xl border-2 border-dashed border-slate-200 p-8 text-center">
+                <p className="text-sm text-slate-500">Здесь пока ничего нет</p>
+                <Link href={`/locations/${id}/items/new`} className="mt-4 inline-block">
+                  <Button size="sm">
+                    <Plus className="h-4 w-4" />
+                    Добавить объект
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {location.items.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
+              </div>
+            )}
+          </CollapsibleSection>
+        </div>
       </div>
     </div>
   );

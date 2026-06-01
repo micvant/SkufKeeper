@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MapPin, Package, FolderTree, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { Header } from "@/components/Navigation";
 import { LocationTreeView } from "@/components/LocationTreeView";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { Button } from "@/components/ui/Button";
 import { collectExpandableIds } from "@/lib/location-tree";
 import type { StatsResponse } from "@/types";
@@ -13,13 +14,14 @@ export default function StatsPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [structureOpen, setStructureOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/stats")
       .then((res) => res.json())
       .then((data: StatsResponse) => {
         setStats(data);
-        setExpanded(collectExpandableIds(data.tree));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -34,7 +36,10 @@ export default function StatsPage() {
   }
 
   function expandAll() {
-    if (stats) setExpanded(collectExpandableIds(stats.tree));
+    if (stats) {
+      setExpanded(collectExpandableIds(stats.tree));
+      setStructureOpen(true);
+    }
   }
 
   function collapseAll() {
@@ -50,33 +55,43 @@ export default function StatsPage() {
           <p className="text-center text-slate-500">Загрузка...</p>
         ) : stats ? (
           <>
-            <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatCard icon={MapPin} label="Мест хранения" value={stats.totalLocations} />
-              <StatCard icon={FolderTree} label="Корневых" value={stats.rootLocations} />
-              <StatCard icon={Package} label="Объектов" value={stats.totalItems} />
-              <StatCard icon={Package} label="Всего штук" value={stats.totalItemQuantity} />
-            </div>
+            <CollapsibleSection
+              title="Сводка"
+              open={summaryOpen}
+              onOpenChange={setSummaryOpen}
+              className="mb-3"
+            >
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <StatCard icon={MapPin} label="Мест хранения" value={stats.totalLocations} />
+                <StatCard icon={FolderTree} label="Корневых" value={stats.rootLocations} />
+                <StatCard icon={Package} label="Объектов" value={stats.totalItems} />
+                <StatCard icon={Package} label="Всего штук" value={stats.totalItemQuantity} />
+              </div>
+            </CollapsibleSection>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-slate-900">Структура хранения</h2>
+            <CollapsibleSection
+              title="Структура хранения"
+              open={structureOpen}
+              onOpenChange={setStructureOpen}
+              actions={
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" type="button" onClick={expandAll}>
                     <ChevronsUpDown className="h-4 w-4" />
-                    Развернуть все
+                    <span className="hidden sm:inline">Развернуть</span>
                   </Button>
                   <Button variant="secondary" size="sm" type="button" onClick={collapseAll}>
                     <ChevronsDownUp className="h-4 w-4" />
-                    Свернуть все
+                    <span className="hidden sm:inline">Свернуть</span>
                   </Button>
                 </div>
-              </div>
+              }
+            >
               <LocationTreeView
                 nodes={stats.tree}
                 expanded={expanded}
                 onToggle={toggleNode}
               />
-            </div>
+            </CollapsibleSection>
           </>
         ) : (
           <p className="text-center text-slate-500">Не удалось загрузить статистику</p>
