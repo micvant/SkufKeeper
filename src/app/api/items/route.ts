@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFile } from "@/lib/upload";
+import { parseIconField } from "@/lib/icon-field";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim();
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
     const locationId = formData.get("locationId") as string;
     const quantity = parseInt(formData.get("quantity") as string) || 1;
     const photo = formData.get("photo") as File | null;
+    const iconNameInput = parseIconField(formData.get("iconName"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
@@ -45,12 +47,14 @@ export async function POST(request: NextRequest) {
     }
 
     let photoPath: string | null = null;
+    let iconName: string | null = iconNameInput;
     if (photo && photo.size > 0) {
       photoPath = await saveUploadedFile(photo);
+      iconName = null;
     }
 
     const item = await prisma.item.create({
-      data: { name, description, locationId, quantity, photoPath },
+      data: { name, description, locationId, quantity, photoPath, iconName },
       include: { location: { select: { id: true, name: true } } },
     });
 

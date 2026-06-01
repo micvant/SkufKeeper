@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Package, MapPin } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { EntityIcon } from "@/components/EntityIcon";
+import { DEFAULT_ITEM_ICON, DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import type { StorageLocation } from "@/types";
 
 interface LocationCardProps {
@@ -28,9 +30,12 @@ export function LocationCard({ location, compact = false }: LocationCardProps) {
               unoptimized
             />
           ) : (
-            <div className="flex h-full items-center justify-center">
-              <MapPin className="h-12 w-12 text-slate-300" />
-            </div>
+            <EntityIcon
+              iconName={location.iconName}
+              fallback={DEFAULT_LOCATION_ICON}
+              className="h-full w-full"
+              iconClassName="h-12 w-12 text-emerald-400"
+            />
           )}
           <div className="absolute bottom-2 right-2 flex gap-1">
             {childCount > 0 && (
@@ -47,7 +52,11 @@ export function LocationCard({ location, compact = false }: LocationCardProps) {
       <div className={compact ? "flex items-center gap-3 p-3" : "p-4"}>
         {compact && (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-            <MapPin className="h-5 w-5 text-emerald-600" />
+            <EntityIcon
+              iconName={location.iconName}
+              fallback={DEFAULT_LOCATION_ICON}
+              iconClassName="h-5 w-5 text-emerald-600"
+            />
           </div>
         )}
         <div className="min-w-0">
@@ -84,41 +93,60 @@ interface ItemCardProps {
     name: string;
     description?: string | null;
     photoPath?: string | null;
+    iconName?: string | null;
     quantity?: number;
     location?: { id: string; name: string };
   };
   showLocation?: boolean;
+  onDelete?: (id: string, name: string) => void;
+  deleting?: boolean;
 }
 
-export function ItemCard({ item, showLocation = false }: ItemCardProps) {
+export function ItemCard({ item, showLocation = false, onDelete, deleting }: ItemCardProps) {
   return (
-    <Link
-      href={`/items/${item.id}`}
-      className="group flex gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
-    >
-      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-        {item.photoPath ? (
-          <Image src={item.photoPath} alt={item.name} fill className="object-cover" unoptimized />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Package className="h-6 w-6 text-slate-300" />
-          </div>
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate font-medium text-slate-900 group-hover:text-emerald-700">
-          {item.name}
-        </h3>
-        {item.quantity && item.quantity > 1 && (
-          <p className="text-xs text-slate-400">×{item.quantity}</p>
-        )}
-        {showLocation && item.location && (
-          <p className="mt-0.5 truncate text-xs text-emerald-600">{item.location.name}</p>
-        )}
-        {item.description && (
-          <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">{item.description}</p>
-        )}
-      </div>
-    </Link>
+    <div className="flex items-center gap-2">
+      <Link
+        href={`/items/${item.id}`}
+        className="group flex min-w-0 flex-1 gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
+      >
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+          {item.photoPath ? (
+            <Image src={item.photoPath} alt={item.name} fill className="object-cover" unoptimized />
+          ) : (
+            <EntityIcon
+              iconName={item.iconName}
+              fallback={DEFAULT_ITEM_ICON}
+              className="h-full w-full"
+              iconClassName="h-6 w-6 text-emerald-500"
+            />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-medium text-slate-900 group-hover:text-emerald-700">
+            {item.name}
+          </h3>
+          {item.quantity && item.quantity > 1 && (
+            <p className="text-xs text-slate-400">×{item.quantity}</p>
+          )}
+          {showLocation && item.location && (
+            <p className="mt-0.5 truncate text-xs text-emerald-600">{item.location.name}</p>
+          )}
+          {item.description && (
+            <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">{item.description}</p>
+          )}
+        </div>
+      </Link>
+      {onDelete && (
+        <button
+          type="button"
+          onClick={() => onDelete(item.id, item.name)}
+          disabled={deleting}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
+          aria-label={`Удалить ${item.name}`}
+        >
+          <Trash2 className="h-5 w-5" />
+        </button>
+      )}
+    </div>
   );
 }

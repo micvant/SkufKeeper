@@ -9,6 +9,8 @@ import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
 import { CollapsibleSection } from "@/components/CollapsibleSection";
 import { LocationQRCode } from "@/components/LocationQRCode";
+import { EntityIcon } from "@/components/EntityIcon";
+import { DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import type { StorageLocation } from "@/types";
 
@@ -20,6 +22,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
   const [location, setLocation] = useState<StorageLocation | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [sections, setSections] = useState<Record<SectionKey, boolean>>({
     qr: false,
     children: false,
@@ -50,6 +53,26 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
 
   function collapseAllSections() {
     setSections({ qr: false, children: false, items: false });
+  }
+
+  async function handleDeleteItem(itemId: string, itemName: string) {
+    if (!confirm(`Удалить «${itemName}»?`)) return;
+
+    setDeletingItemId(itemId);
+    try {
+      const res = await fetch(`/api/items/${itemId}`, { method: "DELETE" });
+      if (!res.ok) return;
+      setLocation((prev) =>
+        prev
+          ? {
+              ...prev,
+              items: prev.items?.filter((item) => item.id !== itemId),
+            }
+          : null
+      );
+    } finally {
+      setDeletingItemId(null);
+    }
   }
 
   async function handleDelete() {
@@ -103,7 +126,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
           </Link>
         )}
 
-        {location.photoPath && (
+        {location.photoPath ? (
           <div className="relative mb-6 aspect-[16/10] max-w-2xl overflow-hidden rounded-2xl bg-slate-100">
             <Image
               src={location.photoPath}
@@ -111,6 +134,14 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               fill
               className="object-cover"
               unoptimized
+            />
+          </div>
+        ) : (
+          <div className="mb-6 flex aspect-[16/10] max-w-2xl items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200">
+            <EntityIcon
+              iconName={location.iconName}
+              fallback={DEFAULT_LOCATION_ICON}
+              iconClassName="h-20 w-20 text-emerald-400"
             />
           </div>
         )}
@@ -236,7 +267,12 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
             ) : (
               <div className="space-y-3">
                 {location.items.map((item) => (
-                  <ItemCard key={item.id} item={item} />
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    onDelete={handleDeleteItem}
+                    deleting={deletingItemId === item.id}
+                  />
                 ))}
               </div>
             )}

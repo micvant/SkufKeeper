@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
+import { IconPicker } from "@/components/IconPicker";
 import { Input } from "@/components/ui/Input";
+import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 
@@ -19,6 +21,7 @@ export default function NewItemPage({
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -45,6 +48,7 @@ export default function NewItemPage({
       formData.append("quantity", quantity);
       if (description.trim()) formData.append("description", description.trim());
       if (photo) formData.append("photo", photo);
+      else if (iconName) formData.append("iconName", iconName);
 
       const res = await fetch("/api/items", { method: "POST", body: formData });
       const data = await res.json();
@@ -90,6 +94,10 @@ export default function NewItemPage({
         />
 
         <PhotoUpload onPhotoChange={setPhoto} label="Фото объекта" />
+
+        {!photo && (
+          <IconPicker value={iconName} onChange={setIconName} variant="item" />
+        )}
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>

@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
+import { IconPicker } from "@/components/IconPicker";
 import { LocationQRCode } from "@/components/LocationQRCode";
 import { Input } from "@/components/ui/Input";
+import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import type { StorageLocation } from "@/types";
@@ -16,6 +18,7 @@ export default function NewLocationPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [created, setCreated] = useState<StorageLocation | null>(null);
@@ -35,6 +38,7 @@ export default function NewLocationPage() {
       formData.append("name", name.trim());
       if (description.trim()) formData.append("description", description.trim());
       if (photo) formData.append("photo", photo);
+      else if (iconName) formData.append("iconName", iconName);
 
       const res = await fetch("/api/locations", { method: "POST", body: formData });
       const data = await res.json();
@@ -98,6 +102,10 @@ export default function NewLocationPage() {
         />
 
         <PhotoUpload onPhotoChange={setPhoto} label="Фото места" />
+
+        {!photo && (
+          <IconPicker value={iconName} onChange={setIconName} variant="location" />
+        )}
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>

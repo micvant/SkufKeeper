@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
+import { parseIconField } from "@/lib/icon-field";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -35,12 +36,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const quantity = parseInt(formData.get("quantity") as string) || 1;
     const photo = formData.get("photo") as File | null;
     const removePhoto = formData.get("removePhoto") === "true";
+    const iconNameInput = parseIconField(formData.get("iconName"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
     }
 
     let photoPath = existing.photoPath;
+    let iconName = iconNameInput ?? existing.iconName;
 
     if (removePhoto && photoPath) {
       await deleteUploadedFile(photoPath);
@@ -50,11 +53,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (photo && photo.size > 0) {
       if (photoPath) await deleteUploadedFile(photoPath);
       photoPath = await saveUploadedFile(photo);
+      iconName = null;
+    } else if (!photoPath && formData.has("iconName")) {
+      iconName = iconNameInput;
     }
 
     const item = await prisma.item.update({
       where: { id },
-      data: { name, description, locationId, quantity, photoPath },
+      data: { name, description, locationId, quantity, photoPath, iconName },
       include: { location: { select: { id: true, name: true } } },
     });
 

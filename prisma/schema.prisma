@@ -13,6 +13,7 @@ model StorageLocation {
   name        String
   description String?
   photoPath   String?
+  iconName    String?
   parentId    String?
   parent      StorageLocation?  @relation("LocationTree", fields: [parentId], references: [id], onDelete: Cascade)
   children    StorageLocation[] @relation("LocationTree")
@@ -28,6 +29,7 @@ model Item {
   name        String
   description String?
   photoPath   String?
+  iconName    String?
   quantity    Int      @default(1)
   locationId  String
   location    StorageLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)

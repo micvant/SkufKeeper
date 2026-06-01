@@ -4,6 +4,7 @@ export interface StorageLocation {
   name: string;
   description: string | null;
   photoPath: string | null;
+  iconName: string | null;
   parentId: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -18,6 +19,7 @@ export interface Item {
   name: string;
   description: string | null;
   photoPath: string | null;
+  iconName: string | null;
   quantity: number;
   locationId: string;
   createdAt: string | Date;

@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/Navigation";
 import { PhotoUpload } from "@/components/PhotoUpload";
+import { IconPicker } from "@/components/IconPicker";
 import { Input } from "@/components/ui/Input";
+import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import type { Item, StorageLocation } from "@/types";
@@ -20,6 +22,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   const [currentPhoto, setCurrentPhoto] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
+  const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
@@ -37,6 +40,9 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
         setQuantity(String(itemData.quantity));
         setLocationId(itemData.locationId);
         setCurrentPhoto(itemData.photoPath);
+        setIconName(
+          itemData.iconName && isValidIconName(itemData.iconName) ? itemData.iconName : null
+        );
         setLocations(locationsData);
       }).finally(() => setFetching(false));
     });
@@ -60,6 +66,9 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       formData.append("locationId", locationId);
       if (photo) formData.append("photo", photo);
       if (removePhoto) formData.append("removePhoto", "true");
+      if (!photo && (!currentPhoto || removePhoto)) {
+        formData.append("iconName", iconName ?? "");
+      }
 
       const res = await fetch(`/api/items/${id}`, { method: "PUT", body: formData });
       const data = await res.json();
@@ -81,6 +90,8 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       </div>
     );
   }
+
+  const showIconPicker = !photo && (!currentPhoto || removePhoto);
 
   return (
     <div>
@@ -130,6 +141,10 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           onRemoveCurrent={() => setRemovePhoto(true)}
           label="Фото объекта"
         />
+
+        {showIconPicker && (
+          <IconPicker value={iconName} onChange={setIconName} variant="item" />
+        )}
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>

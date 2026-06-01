@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Pencil, Trash2 } from "lucide-react";
 import { Header } from "@/components/Navigation";
+import { EntityIcon } from "@/components/EntityIcon";
+import { DEFAULT_ITEM_ICON } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
 import type { Item } from "@/types";
 
@@ -72,7 +74,15 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
               unoptimized
             />
           </div>
-        ) : null}
+        ) : (
+          <div className="mb-6 flex aspect-square max-w-xs items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200">
+            <EntityIcon
+              iconName={item.iconName}
+              fallback={DEFAULT_ITEM_ICON}
+              iconClassName="h-20 w-20 text-emerald-500"
+            />
+          </div>
+        )}
 
         <div className="space-y-4">
           {item.quantity > 1 && (

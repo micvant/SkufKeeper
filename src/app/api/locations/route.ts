@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateUniqueQrToken } from "@/lib/qr-token";
 import { saveUploadedFile } from "@/lib/upload";
+import { parseIconField } from "@/lib/icon-field";
 
 export async function GET(request: NextRequest) {
   const parentId = request.nextUrl.searchParams.get("parentId");
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
     const description = (formData.get("description") as string)?.trim() || null;
     const parentId = (formData.get("parentId") as string)?.trim() || null;
     const photo = formData.get("photo") as File | null;
+    const iconNameInput = parseIconField(formData.get("iconName"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
@@ -38,14 +40,16 @@ export async function POST(request: NextRequest) {
     }
 
     let photoPath: string | null = null;
+    let iconName: string | null = iconNameInput;
     if (photo && photo.size > 0) {
       photoPath = await saveUploadedFile(photo);
+      iconName = null;
     }
 
     const qrToken = await generateUniqueQrToken();
 
     const location = await prisma.storageLocation.create({
-      data: { name, description, photoPath, qrToken, parentId },
+      data: { name, description, photoPath, iconName, qrToken, parentId },
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },

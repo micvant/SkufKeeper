@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { collectDescendantIds } from "@/lib/location-tree";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
+import { parseIconField } from "@/lib/icon-field";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -41,12 +42,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const description = (formData.get("description") as string)?.trim() || null;
     const photo = formData.get("photo") as File | null;
     const removePhoto = formData.get("removePhoto") === "true";
+    const iconNameInput = parseIconField(formData.get("iconName"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
     }
 
     let photoPath = existing.photoPath;
+    let iconName = iconNameInput ?? existing.iconName;
 
     if (removePhoto && photoPath) {
       await deleteUploadedFile(photoPath);
@@ -56,11 +59,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (photo && photo.size > 0) {
       if (photoPath) await deleteUploadedFile(photoPath);
       photoPath = await saveUploadedFile(photo);
+      iconName = null;
+    } else if (!photoPath && formData.has("iconName")) {
+      iconName = iconNameInput;
     }
 
     const location = await prisma.storageLocation.update({
       where: { id },
-      data: { name, description, photoPath },
+      data: { name, description, photoPath, iconName },
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },
