@@ -51,8 +51,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     let photoPath = existing.photoPath;
-    let iconName = iconNameInput ?? existing.iconName;
-    let color = colorInput ?? existing.color;
+    let iconName = existing.iconName;
+    let color = existing.color;
 
     if (removePhoto && photoPath) {
       await deleteUploadedFile(photoPath);
@@ -63,12 +63,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
       if (photoPath) await deleteUploadedFile(photoPath);
       photoPath = await saveUploadedFile(photo);
       iconName = null;
-    } else if (!photoPath && formData.has("iconName")) {
-      iconName = iconNameInput;
-    }
-
-    if (!photoPath && formData.has("color")) {
-      color = colorInput;
+    } else if (!photoPath) {
+      if (formData.has("iconName")) iconName = iconNameInput;
+      if (formData.has("color")) color = colorInput;
     }
 
     const location = await prisma.storageLocation.update({

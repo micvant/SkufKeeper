@@ -18,17 +18,11 @@ export function EntityIcon({
   iconClassName,
 }: EntityIconProps) {
   const Icon = getEntityIcon(iconName, fallback);
-  const color = colorSlug ? getLocationColorStyles(colorSlug) : null;
+  const color = getLocationColorStyles(colorSlug);
 
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center",
-        color?.bg,
-        className
-      )}
-    >
-      <Icon className={cn(color?.text, iconClassName)} />
+    <div className={cn("flex items-center justify-center", color.bg, className)}>
+      <Icon className={cn(color.text, iconClassName)} />
     </div>
   );
 }

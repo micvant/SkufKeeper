@@ -53,8 +53,8 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
       if (description.trim()) formData.append("description", description.trim());
       if (photo) formData.append("photo", photo);
       else {
-        if (iconName) formData.append("iconName", iconName);
-        if (color) formData.append("color", color);
+        formData.append("iconName", iconName ?? "");
+        formData.append("color", color ?? "");
       }
 
       const res = await fetch("/api/locations", { method: "POST", body: formData });

@@ -35,3 +35,9 @@ export function parseLocationColor(slug: string | null | undefined): LocationCol
 export function getLocationColorStyles(slug: string | null | undefined) {
   return LOCATION_COLORS[parseLocationColor(slug)];
 }
+
+/** Все Tailwind-классы цветов — для safelist в tailwind.config.ts */
+export const LOCATION_COLOR_CLASSNAMES = LOCATION_COLOR_SLUGS.flatMap((slug) => {
+  const c = LOCATION_COLORS[slug];
+  return [c.bg, c.text, c.ring, c.swatch];
+});
