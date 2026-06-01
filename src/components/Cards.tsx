@@ -5,39 +5,65 @@ import type { StorageLocation } from "@/types";
 
 interface LocationCardProps {
   location: StorageLocation;
+  compact?: boolean;
 }
 
-export function LocationCard({ location }: LocationCardProps) {
+export function LocationCard({ location, compact = false }: LocationCardProps) {
+  const itemCount = location._count?.items ?? 0;
+  const childCount = location._count?.children ?? 0;
+
   return (
     <Link
       href={`/locations/${location.id}`}
       className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
     >
-      <div className="relative aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200">
-        {location.photoPath ? (
-          <Image
-            src={location.photoPath}
-            alt={location.name}
-            fill
-            className="object-cover transition-transform group-hover:scale-105"
-            unoptimized
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <MapPin className="h-12 w-12 text-slate-300" />
+      {!compact && (
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200">
+          {location.photoPath ? (
+            <Image
+              src={location.photoPath}
+              alt={location.name}
+              fill
+              className="object-cover transition-transform group-hover:scale-105"
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <MapPin className="h-12 w-12 text-slate-300" />
+            </div>
+          )}
+          <div className="absolute bottom-2 right-2 flex gap-1">
+            {childCount > 0 && (
+              <span className="rounded-lg bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                {childCount} влож.
+              </span>
+            )}
+            <span className="rounded-lg bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+              {itemCount} {getItemWord(itemCount)}
+            </span>
+          </div>
+        </div>
+      )}
+      <div className={compact ? "flex items-center gap-3 p-3" : "p-4"}>
+        {compact && (
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
+            <MapPin className="h-5 w-5 text-emerald-600" />
           </div>
         )}
-        <div className="absolute bottom-2 right-2 rounded-lg bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-          {location._count?.items ?? 0} {getItemWord(location._count?.items ?? 0)}
+        <div className="min-w-0">
+          <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700">
+            {location.name}
+          </h3>
+          {compact && (
+            <p className="text-xs text-slate-500">
+              {itemCount} {getItemWord(itemCount)}
+              {childCount > 0 && ` · ${childCount} влож.`}
+            </p>
+          )}
+          {!compact && location.description && (
+            <p className="mt-1 line-clamp-2 text-sm text-slate-500">{location.description}</p>
+          )}
         </div>
-      </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700">
-          {location.name}
-        </h3>
-        {location.description && (
-          <p className="mt-1 line-clamp-2 text-sm text-slate-500">{location.description}</p>
-        )}
       </div>
     </Link>
   );

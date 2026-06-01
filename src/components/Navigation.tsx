@@ -2,39 +2,43 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Plus, MapPin, QrCode } from "lucide-react";
+import { Home, Search, Plus, QrCode, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", icon: Home, label: "Главная" },
+  { href: "/stats", icon: BarChart3, label: "Статистика" },
   { href: "/search", icon: Search, label: "Поиск" },
   { href: "/scan", icon: QrCode, label: "Сканер" },
   { href: "/locations/new", icon: Plus, label: "Добавить" },
 ];
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  if (href === "/locations/new") return pathname === "/locations/new";
+  return pathname.startsWith(href);
+}
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/90 backdrop-blur-lg safe-bottom md:hidden">
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-2">
+      <div className="mx-auto flex max-w-lg items-center justify-around px-1 py-1.5">
         {navItems.map(({ href, icon: Icon, label }) => {
-          const isActive =
-            href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(href);
+          const active = isActive(pathname, href);
 
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 rounded-xl px-4 py-1.5 text-xs font-medium transition-colors",
-                isActive ? "text-emerald-600" : "text-slate-500 hover:text-slate-700"
+                "flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1 text-[10px] font-medium transition-colors",
+                active ? "text-emerald-600" : "text-slate-500 hover:text-slate-700"
               )}
             >
-              <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5]")} />
-              {label}
+              <Icon className={cn("h-5 w-5 shrink-0", active && "stroke-[2.5]")} />
+              <span className="truncate">{label}</span>
             </Link>
           );
         })}
@@ -48,9 +52,10 @@ export function Sidebar() {
 
   const links = [
     { href: "/", icon: Home, label: "Главная" },
+    { href: "/stats", icon: BarChart3, label: "Статистика" },
     { href: "/search", icon: Search, label: "Поиск" },
     { href: "/scan", icon: QrCode, label: "Сканер QR" },
-    { href: "/locations/new", icon: MapPin, label: "Новое место" },
+    { href: "/locations/new", icon: Plus, label: "Новое место" },
   ];
 
   return (
@@ -66,10 +71,7 @@ export function Sidebar() {
       </div>
       <nav className="flex flex-col gap-1 p-4">
         {links.map(({ href, icon: Icon, label }) => {
-          const isActive =
-            href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(href);
+          const active = isActive(pathname, href);
 
           return (
             <Link
@@ -77,7 +79,7 @@ export function Sidebar() {
               href={href}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
-                isActive
+                active
                   ? "bg-emerald-50 text-emerald-700"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               )}

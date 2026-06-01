@@ -4,10 +4,13 @@ export interface StorageLocation {
   name: string;
   description: string | null;
   photoPath: string | null;
+  parentId: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
-  _count?: { items: number };
+  _count?: { items: number; children?: number };
   items?: Item[];
+  children?: StorageLocation[];
+  parent?: { id: string; name: string } | null;
 }
 
 export interface Item {
@@ -20,4 +23,24 @@ export interface Item {
   createdAt: string | Date;
   updatedAt: string | Date;
   location?: { id: string; name: string };
+}
+
+export interface LocationTreeNode {
+  id: string;
+  name: string;
+  parentId: string | null;
+  directItems: number;
+  directItemQuantity: number;
+  childLocations: number;
+  totalItems: number;
+  totalItemQuantity: number;
+  children: LocationTreeNode[];
+}
+
+export interface StatsResponse {
+  totalLocations: number;
+  totalItems: number;
+  totalItemQuantity: number;
+  rootLocations: number;
+  tree: LocationTreeNode[];
 }

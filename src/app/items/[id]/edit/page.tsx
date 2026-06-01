@@ -30,7 +30,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
 
       Promise.all([
         fetch(`/api/items/${itemId}`).then((r) => r.json()),
-        fetch("/api/locations").then((r) => r.json()),
+        fetch("/api/locations?all=true").then((r) => r.json()),
       ]).then(([itemData, locationsData]: [Item, StorageLocation[]]) => {
         setName(itemData.name);
         setDescription(itemData.description || "");

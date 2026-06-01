@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { collectDescendantIds } from "@/lib/location-tree";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 
 type Params = { params: Promise<{ id: string }> };
@@ -11,6 +12,11 @@ export async function GET(_request: NextRequest, { params }: Params) {
     where: { id },
     include: {
       items: { orderBy: { updatedAt: "desc" } },
+      children: {
+        include: { _count: { select: { items: true, children: true } } },
+        orderBy: { name: "asc" },
+      },
+      parent: { select: { id: true, name: true } },
     },
   });
 
@@ -55,7 +61,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const location = await prisma.storageLocation.update({
       where: { id },
       data: { name, description, photoPath },
-      include: { _count: { select: { items: true } } },
+      include: {
+        _count: { select: { items: true, children: true } },
+        parent: { select: { id: true, name: true } },
+      },
     });
 
     return NextResponse.json(location);
@@ -68,18 +77,26 @@ export async function PUT(request: NextRequest, { params }: Params) {
 export async function DELETE(_request: NextRequest, { params }: Params) {
   const { id } = await params;
 
-  const location = await prisma.storageLocation.findUnique({
-    where: { id },
-    include: { items: true },
-  });
-
+  const location = await prisma.storageLocation.findUnique({ where: { id } });
   if (!location) {
     return NextResponse.json({ error: "Место не найдено" }, { status: 404 });
   }
 
-  await deleteUploadedFile(location.photoPath);
-  for (const item of location.items) {
-    await deleteUploadedFile(item.photoPath);
+  const getChildren = async (parentId: string) =>
+    prisma.storageLocation.findMany({ where: { parentId }, select: { id: true } });
+
+  const ids = await collectDescendantIds(getChildren, id);
+
+  const allLocations = await prisma.storageLocation.findMany({
+    where: { id: { in: ids } },
+    include: { items: true },
+  });
+
+  for (const loc of allLocations) {
+    await deleteUploadedFile(loc.photoPath);
+    for (const item of loc.items) {
+      await deleteUploadedFile(item.photoPath);
+    }
   }
 
   await prisma.storageLocation.delete({ where: { id } });

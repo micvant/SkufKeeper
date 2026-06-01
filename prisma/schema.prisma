@@ -13,9 +13,14 @@ model StorageLocation {
   name        String
   description String?
   photoPath   String?
+  parentId    String?
+  parent      StorageLocation?  @relation("LocationTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    StorageLocation[] @relation("LocationTree")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   items       Item[]
+
+  @@index([parentId])
 }
 
 model Item {
