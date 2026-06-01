@@ -1,79 +1,92 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { EntityIcon } from "@/components/EntityIcon";
 import { DEFAULT_ITEM_ICON, DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import type { StorageLocation } from "@/types";
 
 interface LocationCardProps {
   location: StorageLocation;
+  /** Компактная строка — для списков на телефоне */
   compact?: boolean;
+}
+
+function LocationThumb({
+  location,
+  size = "md",
+}: {
+  location: StorageLocation;
+  size?: "sm" | "md";
+}) {
+  const box = size === "sm" ? "h-10 w-10 rounded-lg" : "h-11 w-11 rounded-xl";
+  const icon = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+
+  return (
+    <div className={`relative shrink-0 overflow-hidden bg-slate-100 ${box}`}>
+      {location.photoPath ? (
+        <Image
+          src={location.photoPath}
+          alt=""
+          fill
+          className="object-cover"
+          unoptimized
+        />
+      ) : (
+        <EntityIcon
+          iconName={location.iconName}
+          fallback={DEFAULT_LOCATION_ICON}
+          className="h-full w-full bg-emerald-50"
+          iconClassName={`${icon} text-emerald-600`}
+        />
+      )}
+    </div>
+  );
 }
 
 export function LocationCard({ location, compact = false }: LocationCardProps) {
   const itemCount = location._count?.items ?? 0;
   const childCount = location._count?.children ?? 0;
+  const meta = [
+    `${itemCount} ${getItemWord(itemCount)}`,
+    childCount > 0 ? `${childCount} влож.` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  if (compact) {
+    return (
+      <Link
+        href={`/locations/${location.id}`}
+        className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition-all hover:border-emerald-300 active:scale-[0.99]"
+      >
+        <LocationThumb location={location} />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-emerald-700">
+            {location.name}
+          </h3>
+          <p className="truncate text-xs text-slate-500">{meta}</p>
+        </div>
+        <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 group-hover:text-emerald-500" />
+      </Link>
+    );
+  }
 
   return (
     <Link
       href={`/locations/${location.id}`}
-      className="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
+      className="group flex gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
     >
-      {!compact && (
-        <div className="relative aspect-[16/11] bg-gradient-to-br from-slate-100 to-slate-200">
-          {location.photoPath ? (
-            <Image
-              src={location.photoPath}
-              alt={location.name}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
-              unoptimized
-            />
-          ) : (
-            <EntityIcon
-              iconName={location.iconName}
-              fallback={DEFAULT_LOCATION_ICON}
-              className="h-full w-full"
-              iconClassName="h-12 w-12 text-emerald-400"
-            />
-          )}
-          <div className="absolute bottom-2 right-2 flex gap-1">
-            {childCount > 0 && (
-              <span className="rounded-lg bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                {childCount} влож.
-              </span>
-            )}
-            <span className="rounded-lg bg-black/60 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-              {itemCount} {getItemWord(itemCount)}
-            </span>
-          </div>
-        </div>
-      )}
-      <div className={compact ? "flex items-center gap-3 p-3" : "p-4"}>
-        {compact && (
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
-            <EntityIcon
-              iconName={location.iconName}
-              fallback={DEFAULT_LOCATION_ICON}
-              iconClassName="h-5 w-5 text-emerald-600"
-            />
-          </div>
+      <LocationThumb location={location} size="md" />
+      <div className="min-w-0 flex-1">
+        <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700">
+          {location.name}
+        </h3>
+        <p className="mt-0.5 text-xs text-slate-500">{meta}</p>
+        {location.description && (
+          <p className="mt-1 line-clamp-2 text-sm text-slate-500">{location.description}</p>
         )}
-        <div className="min-w-0">
-          <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700">
-            {location.name}
-          </h3>
-          {compact && (
-            <p className="text-xs text-slate-500">
-              {itemCount} {getItemWord(itemCount)}
-              {childCount > 0 && ` · ${childCount} влож.`}
-            </p>
-          )}
-          {!compact && location.description && (
-            <p className="mt-1 line-clamp-2 text-sm text-slate-500">{location.description}</p>
-          )}
-        </div>
       </div>
+      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-slate-300 group-hover:text-emerald-500" />
     </Link>
   );
 }
