@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", icon: Home, label: "Главная" },
+  { href: "/stats", icon: BarChart3, label: "Статистика" },
   { href: "/search", icon: Search, label: "Поиск" },
   { href: "/scan", icon: ScanLine, label: "Сканер" },
   { href: "/locations/new", icon: Plus, label: "Добавить" },
@@ -35,7 +36,7 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1 text-[10px] font-medium transition-colors",
+                "flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-0.5 py-1 text-[9px] font-medium transition-colors sm:text-[10px]",
                 active ? "text-primary" : "text-slate-500 hover:text-slate-700"
               )}
             >
