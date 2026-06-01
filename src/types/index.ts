@@ -25,6 +25,12 @@ export interface Item {
   location?: { id: string; name: string };
 }
 
+export interface ItemTreeNode {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
 export interface LocationTreeNode {
   id: string;
   name: string;
@@ -34,6 +40,7 @@ export interface LocationTreeNode {
   childLocations: number;
   totalItems: number;
   totalItemQuantity: number;
+  items: ItemTreeNode[];
   children: LocationTreeNode[];
 }
 

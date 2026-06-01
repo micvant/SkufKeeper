@@ -8,7 +8,7 @@ export async function GET() {
       id: true,
       name: true,
       parentId: true,
-      items: { select: { quantity: true } },
+      items: { select: { id: true, name: true, quantity: true } },
       _count: { select: { children: true } },
     },
     orderBy: { name: "asc" },

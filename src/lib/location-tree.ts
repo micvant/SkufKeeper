@@ -4,7 +4,7 @@ type LocationRow = {
   id: string;
   name: string;
   parentId: string | null;
-  items: { quantity: number }[];
+  items: { id: string; name: string; quantity: number }[];
   _count: { children: number };
 };
 
@@ -13,6 +13,7 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
 
   for (const loc of locations) {
     const directItemQuantity = loc.items.reduce((sum, item) => sum + item.quantity, 0);
+    const sortedItems = [...loc.items].sort((a, b) => a.name.localeCompare(b.name, "ru"));
     nodes.set(loc.id, {
       id: loc.id,
       name: loc.name,
@@ -22,6 +23,7 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
       childLocations: loc._count.children,
       totalItems: loc.items.length,
       totalItemQuantity: directItemQuantity,
+      items: sortedItems,
       children: [],
     });
   }
@@ -66,6 +68,22 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
 function sortTree(nodes: LocationTreeNode[]): void {
   nodes.sort((a, b) => a.name.localeCompare(b.name, "ru"));
   for (const node of nodes) sortTree(node.children);
+}
+
+export function collectExpandableIds(nodes: LocationTreeNode[]): Set<string> {
+  const ids = new Set<string>();
+
+  function walk(list: LocationTreeNode[]) {
+    for (const node of list) {
+      if (node.children.length > 0 || node.items.length > 0) {
+        ids.add(node.id);
+      }
+      walk(node.children);
+    }
+  }
+
+  walk(nodes);
+  return ids;
 }
 
 export async function collectDescendantIds(
