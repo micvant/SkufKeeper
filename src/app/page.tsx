@@ -6,15 +6,61 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [rootLocations, totalLocations, totalItems] = await Promise.all([
+  const [allLocations, totalItems] = await Promise.all([
     prisma.storageLocation.findMany({
-      where: { parentId: null },
       include: { _count: { select: { items: true, children: true } } },
       orderBy: { updatedAt: "desc" },
     }),
-    prisma.storageLocation.count(),
     prisma.item.count(),
   ]);
+
+  const locationById = new Map(allLocations.map((loc) => [loc.id, loc]));
+  const childrenByParent = new Map<string, string[]>();
+
+  for (const loc of allLocations) {
+    if (!loc.parentId) continue;
+    const list = childrenByParent.get(loc.parentId) ?? [];
+    list.push(loc.id);
+    childrenByParent.set(loc.parentId, list);
+  }
+
+  const aggregateCache = new Map<string, { nestedLocations: number; totalItems: number }>();
+  const aggregate = (id: string): { nestedLocations: number; totalItems: number } => {
+    const cached = aggregateCache.get(id);
+    if (cached) return cached;
+
+    const current = locationById.get(id);
+    if (!current) return { nestedLocations: 0, totalItems: 0 };
+
+    const children = childrenByParent.get(id) ?? [];
+    let nestedLocations = 0;
+    let totalItemsInBranch = current._count.items;
+
+    for (const childId of children) {
+      const childAgg = aggregate(childId);
+      nestedLocations += 1 + childAgg.nestedLocations;
+      totalItemsInBranch += childAgg.totalItems;
+    }
+
+    const result = { nestedLocations, totalItems: totalItemsInBranch };
+    aggregateCache.set(id, result);
+    return result;
+  };
+
+  const rootLocations = allLocations
+    .filter((loc) => !loc.parentId)
+    .map((root) => {
+      const agg = aggregate(root.id);
+      return {
+        ...root,
+        _count: {
+          items: agg.totalItems,
+          children: agg.nestedLocations,
+        },
+      };
+    });
+
+  const totalLocations = allLocations.length;
 
   return (
     <div>
