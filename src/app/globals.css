@@ -26,6 +26,17 @@ nextjs-portal,
   display: none !important;
 }
 
+.qr-reader video {
+  width: 100% !important;
+  height: auto !important;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+.qr-reader img {
+  display: none;
+}
+
 @media screen and (max-width: 767px) {
   input,
   textarea,

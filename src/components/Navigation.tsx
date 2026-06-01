@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, Plus, QrCode, BarChart3 } from "lucide-react";
+import { Home, Search, Plus, QrCode, BarChart3, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", icon: Home, label: "Главная" },
   { href: "/stats", icon: BarChart3, label: "Статистика" },
   { href: "/search", icon: Search, label: "Поиск" },
-  { href: "/scan", icon: QrCode, label: "Сканер" },
+  { href: "/scan", icon: ScanLine, label: "Сканер" },
   { href: "/locations/new", icon: Plus, label: "Добавить" },
 ];
 
@@ -54,7 +54,8 @@ export function Sidebar() {
     { href: "/", icon: Home, label: "Главная" },
     { href: "/stats", icon: BarChart3, label: "Статистика" },
     { href: "/search", icon: Search, label: "Поиск" },
-    { href: "/scan", icon: QrCode, label: "Сканер QR" },
+    { href: "/qr-codes", icon: QrCode, label: "QR-коды" },
+    { href: "/scan", icon: ScanLine, label: "Сканер QR" },
     { href: "/locations/new", icon: Plus, label: "Новое место" },
   ];
 
