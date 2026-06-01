@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, Plus, Search, BarChart3 } from "lucide-react";
 import { AppLogo } from "@/components/AppLogo";
+import { BurgerMenu } from "@/components/Navigation";
 import { LocationCard } from "@/components/Cards";
 import { prisma } from "@/lib/prisma";
 
@@ -66,13 +67,14 @@ export default async function HomePage() {
 
   return (
     <div>
-      <div className="border-b border-slate-200 bg-white px-4 py-3 safe-top md:hidden">
-        <div className="flex min-w-0 items-center gap-2.5">
+      <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-lg safe-top md:hidden">
+        <div className="flex items-center gap-2.5 px-4 py-3">
           <AppLogo size={36} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="truncate text-lg font-bold text-slate-900">SkufKeeper</h1>
             <p className="truncate text-xs text-slate-500">{statsLine}</p>
           </div>
+          <BurgerMenu />
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { Sidebar, BottomNav } from "@/components/Navigation";
+import { Sidebar } from "@/components/Navigation";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
@@ -37,8 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex min-h-dvh">
             <Sidebar />
             <div className="flex flex-1 flex-col">
-              <main className="flex-1 pb-20 md:pb-0">{children}</main>
-              <BottomNav />
+              <main className="flex-1">{children}</main>
             </div>
           </div>
         </ThemeProvider>
