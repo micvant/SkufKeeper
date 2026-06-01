@@ -44,6 +44,19 @@ npm run dev
 - В приложении откройте **Сканер** и отсканируйте код — откроется содержимое места
 - На iPhone по HTTP используйте **«Сфотографировать QR-код»** — живая камера работает только по HTTPS
 
+## Деплой на Railway (HTTPS)
+
+1. Подключите репозиторий [github.com/micvant/SkufKeeper](https://github.com/micvant/SkufKeeper)
+2. **Volume** → mount path: `/data`
+3. **Variables**:
+   ```
+   DATABASE_URL=file:/data/dev.db
+   NEXT_PUBLIC_APP_URL=https://skufkeeper-production.up.railway.app
+   ```
+   (URL возьмите из **Settings → Networking → Public URL**)
+4. **Удалите** кастомный Start Command в UI — используется `railway.toml`
+5. **Redeploy**
+
 ## Стек
 
 - Next.js 15 + React 19
