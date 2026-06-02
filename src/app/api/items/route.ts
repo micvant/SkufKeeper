@@ -10,15 +10,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Укажите поисковый запрос" }, { status: 400 });
   }
 
-  const items = await prisma.item.findMany({
-    where: {
-      name: { contains: query },
-    },
+  const lowerQuery = query.toLowerCase();
+  const all_items = await prisma.item.findMany({
     include: {
       location: { select: { id: true, name: true } },
     },
     orderBy: { name: "asc" },
   });
+  const items = all_items.filter((i) =>
+    i.name.toLowerCase().includes(lowerQuery)
+  );
 
   return NextResponse.json(items);
 }

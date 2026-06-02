@@ -11,15 +11,17 @@ export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim();
 
   if (query) {
-    const locations = await prisma.storageLocation.findMany({
-      where: { name: { contains: query } },
+    const lowerQuery = query.toLowerCase();
+    const all_locations = await prisma.storageLocation.findMany({
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },
       },
       orderBy: { name: "asc" },
-      take: 30,
     });
+    const locations = all_locations
+      .filter((l) => l.name.toLowerCase().includes(lowerQuery))
+      .slice(0, 30);
     return NextResponse.json(locations);
   }
 
