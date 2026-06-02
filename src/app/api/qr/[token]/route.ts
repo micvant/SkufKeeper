@@ -3,16 +3,20 @@ import QRCode from "qrcode";
 import { prisma } from "@/lib/prisma";
 import { getPublicBaseUrl } from "@/lib/public-url";
 import { getQrPayload, getQrScanUrl } from "@/lib/url";
+import { getRequestUserId } from "@/lib/auth";
 
 type Params = { params: Promise<{ token: string }> };
 
 export async function GET(request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { token } = await params;
   const format = request.nextUrl.searchParams.get("format") ?? "token";
   const baseParam = request.nextUrl.searchParams.get("base");
 
-  const location = await prisma.storageLocation.findUnique({
-    where: { qrToken: token },
+  const location = await prisma.storageLocation.findFirst({
+    where: { qrToken: token, userId },
     select: { id: true, name: true, qrToken: true },
   });
 

@@ -4,17 +4,22 @@ import { collectDescendantIds } from "@/lib/location-tree";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseColorField } from "@/lib/color-field";
+import { getRequestUserId } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(_request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { id } = await params;
 
-  const location = await prisma.storageLocation.findUnique({
-    where: { id },
+  const location = await prisma.storageLocation.findFirst({
+    where: { id, userId },
     include: {
-      items: { orderBy: { updatedAt: "desc" } },
+      items: { where: { userId }, orderBy: { updatedAt: "desc" } },
       children: {
+        where: { userId },
         include: { _count: { select: { items: true, children: true } } },
         orderBy: { name: "asc" },
       },
@@ -30,10 +35,13 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 export async function PUT(request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { id } = await params;
 
   try {
-    const existing = await prisma.storageLocation.findUnique({ where: { id } });
+    const existing = await prisma.storageLocation.findFirst({ where: { id, userId } });
     if (!existing) {
       return NextResponse.json({ error: "Место не найдено" }, { status: 404 });
     }
@@ -69,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     const location = await prisma.storageLocation.update({
-      where: { id },
+      where: { id: existing.id },
       data: { name, description, photoPath, iconName, color },
       include: {
         _count: { select: { items: true, children: true } },
@@ -85,21 +93,24 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(_request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { id } = await params;
 
-  const location = await prisma.storageLocation.findUnique({ where: { id } });
+  const location = await prisma.storageLocation.findFirst({ where: { id, userId } });
   if (!location) {
     return NextResponse.json({ error: "Место не найдено" }, { status: 404 });
   }
 
   const getChildren = async (parentId: string) =>
-    prisma.storageLocation.findMany({ where: { parentId }, select: { id: true } });
+    prisma.storageLocation.findMany({ where: { parentId, userId }, select: { id: true } });
 
   const ids = await collectDescendantIds(getChildren, id);
 
   const allLocations = await prisma.storageLocation.findMany({
-    where: { id: { in: ids } },
-    include: { items: true },
+    where: { id: { in: ids }, userId },
+    include: { items: { where: { userId } } },
   });
 
   for (const loc of allLocations) {
@@ -109,7 +120,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     }
   }
 
-  await prisma.storageLocation.delete({ where: { id } });
+  await prisma.storageLocation.delete({ where: { id: location.id } });
 
   return NextResponse.json({ success: true });
 }

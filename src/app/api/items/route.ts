@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
+import { getRequestUserId } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  const userId = await getRequestUserId(request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const query = request.nextUrl.searchParams.get("q")?.trim();
 
   if (!query) {
@@ -12,6 +16,7 @@ export async function GET(request: NextRequest) {
 
   const lowerQuery = query.toLowerCase();
   const all_items = await prisma.item.findMany({
+    where: { userId },
     include: {
       location: { select: { id: true, name: true } },
     },
@@ -26,6 +31,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = await getRequestUserId(request);
+    if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
     const formData = await request.formData();
     const name = (formData.get("name") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() || null;
@@ -42,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Место хранения обязательно" }, { status: 400 });
     }
 
-    const location = await prisma.storageLocation.findUnique({ where: { id: locationId } });
+    const location = await prisma.storageLocation.findFirst({ where: { id: locationId, userId } });
     if (!location) {
       return NextResponse.json({ error: "Место хранения не найдено" }, { status: 404 });
     }
@@ -55,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const item = await prisma.item.create({
-      data: { name, description, locationId, quantity, photoPath, iconName },
+      data: { name, description, locationId, quantity, photoPath, iconName, userId },
       include: { location: { select: { id: true, name: true } } },
     });
 

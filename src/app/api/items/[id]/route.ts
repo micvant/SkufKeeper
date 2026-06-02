@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
+import { getRequestUserId } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(_request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { id } = await params;
 
-  const item = await prisma.item.findUnique({
-    where: { id },
+  const item = await prisma.item.findFirst({
+    where: { id, userId },
     include: { location: { select: { id: true, name: true } } },
   });
 
@@ -21,10 +25,13 @@ export async function GET(_request: NextRequest, { params }: Params) {
 }
 
 export async function PUT(request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { id } = await params;
 
   try {
-    const existing = await prisma.item.findUnique({ where: { id } });
+    const existing = await prisma.item.findFirst({ where: { id, userId } });
     if (!existing) {
       return NextResponse.json({ error: "Объект не найден" }, { status: 404 });
     }
@@ -58,8 +65,16 @@ export async function PUT(request: NextRequest, { params }: Params) {
       iconName = iconNameInput;
     }
 
+    const targetLocation = await prisma.storageLocation.findFirst({
+      where: { id: locationId, userId },
+      select: { id: true },
+    });
+    if (!targetLocation) {
+      return NextResponse.json({ error: "Место хранения не найдено" }, { status: 404 });
+    }
+
     const item = await prisma.item.update({
-      where: { id },
+      where: { id: existing.id },
       data: { name, description, locationId, quantity, photoPath, iconName },
       include: { location: { select: { id: true, name: true } } },
     });
@@ -72,15 +87,18 @@ export async function PUT(request: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
+  const userId = await getRequestUserId(_request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const { id } = await params;
 
-  const item = await prisma.item.findUnique({ where: { id } });
+  const item = await prisma.item.findFirst({ where: { id, userId } });
   if (!item) {
     return NextResponse.json({ error: "Объект не найден" }, { status: 404 });
   }
 
   await deleteUploadedFile(item.photoPath);
-  await prisma.item.delete({ where: { id } });
+  await prisma.item.delete({ where: { id: item.id } });
 
   return NextResponse.json({ success: true });
 }

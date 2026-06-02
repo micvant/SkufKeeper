@@ -4,9 +4,18 @@ import { Header } from "@/components/Navigation";
 import { useAppTheme } from "@/components/ThemeProvider";
 import { APP_THEME_IDS, APP_THEMES } from "@/lib/app-theme";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useAppTheme();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <div>
@@ -48,6 +57,14 @@ export default function SettingsPage() {
               );
             })}
           </div>
+        </section>
+
+        <section>
+          <h2 className="text-sm font-medium text-slate-700">Аккаунт</h2>
+          <p className="mt-1 text-xs text-slate-500">Выйти из текущей сессии</p>
+          <Button type="button" variant="secondary" className="mt-3" onClick={handleLogout}>
+            Выйти
+          </Button>
         </section>
       </div>
     </div>

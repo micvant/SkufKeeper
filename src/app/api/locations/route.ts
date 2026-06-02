@@ -4,8 +4,12 @@ import { generateUniqueQrToken } from "@/lib/qr-token";
 import { saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseColorField } from "@/lib/color-field";
+import { getRequestUserId } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  const userId = await getRequestUserId(request);
+  if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
   const parentId = request.nextUrl.searchParams.get("parentId");
   const all = request.nextUrl.searchParams.get("all") === "true";
   const query = request.nextUrl.searchParams.get("q")?.trim();
@@ -13,6 +17,7 @@ export async function GET(request: NextRequest) {
   if (query) {
     const lowerQuery = query.toLowerCase();
     const all_locations = await prisma.storageLocation.findMany({
+      where: { userId },
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },
@@ -26,7 +31,7 @@ export async function GET(request: NextRequest) {
   }
 
   const locations = await prisma.storageLocation.findMany({
-    where: all ? undefined : parentId ? { parentId } : { parentId: null },
+    where: all ? { userId } : parentId ? { parentId, userId } : { parentId: null, userId },
     include: {
       _count: { select: { items: true, children: true } },
       ...(all ? { parent: { select: { id: true, name: true } } } : {}),
@@ -39,6 +44,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = await getRequestUserId(request);
+    if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
+
     const formData = await request.formData();
     const name = (formData.get("name") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() || null;
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (parentId) {
-      const parent = await prisma.storageLocation.findUnique({ where: { id: parentId } });
+      const parent = await prisma.storageLocation.findFirst({ where: { id: parentId, userId } });
       if (!parent) {
         return NextResponse.json({ error: "Родительское место не найдено" }, { status: 404 });
       }
@@ -68,7 +76,7 @@ export async function POST(request: NextRequest) {
     const qrToken = await generateUniqueQrToken();
 
     const location = await prisma.storageLocation.create({
-      data: { name, description, photoPath, iconName, color: colorInput, qrToken, parentId },
+      data: { name, description, photoPath, iconName, color: colorInput, qrToken, parentId, userId },
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },

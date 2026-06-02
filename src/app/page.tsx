@@ -4,16 +4,24 @@ import { AppLogo } from "@/components/AppLogo";
 import { BurgerMenu } from "@/components/Navigation";
 import { LocationCard } from "@/components/Cards";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    redirect("/login");
+  }
+
   const [allLocations, totalItems] = await Promise.all([
     prisma.storageLocation.findMany({
+      where: { userId },
       include: { _count: { select: { items: true, children: true } } },
       orderBy: { updatedAt: "desc" },
     }),
-    prisma.item.count(),
+    prisma.item.count({ where: { userId } }),
   ]);
 
   const locationById = new Map(allLocations.map((loc) => [loc.id, loc]));
