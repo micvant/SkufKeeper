@@ -6,6 +6,7 @@ import {
   getSessionCookieOptions,
   hashPassword,
 } from "@/lib/auth";
+import { seedDemoStorageForUser } from "@/lib/seed-demo-data";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,9 +38,11 @@ export async function POST(request: NextRequest) {
         select: { id: true, email: true },
       });
 
-      // Preserve pre-auth data by assigning all unowned records to the first registering user.
       const usersCount = await tx.user.count();
-      if (usersCount === 1) {
+      const isFirstUser = usersCount === 1;
+
+      // Preserve pre-auth data by assigning all unowned records to the first registering user.
+      if (isFirstUser) {
         await tx.storageLocation.updateMany({
           where: { userId: null },
           data: { userId: created.id },
@@ -48,6 +51,11 @@ export async function POST(request: NextRequest) {
           where: { userId: null },
           data: { userId: created.id },
         });
+      }
+
+      const ownedLocations = await tx.storageLocation.count({ where: { userId: created.id } });
+      if (!isFirstUser || ownedLocations === 0) {
+        await seedDemoStorageForUser(tx, created.id);
       }
 
       return created;
