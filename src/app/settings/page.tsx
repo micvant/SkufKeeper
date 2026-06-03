@@ -64,13 +64,13 @@ export default function SettingsPage() {
         <CustomFieldDefinitionsEditor
           entityType="item"
           title="Доп. поля для всех объектов"
-          description="Задайте список полей. На конкретном объекте можно добавить только нужные."
+          description="Задайте поля: текст или перечисление с вариантами на выбор."
         />
 
         <CustomFieldDefinitionsEditor
           entityType="location"
           title="Доп. поля для всех мест хранения"
-          description="Задайте список полей. На конкретном месте можно добавить только нужные."
+          description="Задайте поля: текст или перечисление с вариантами на выбор."
         />
 
         <section>

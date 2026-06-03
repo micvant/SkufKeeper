@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, Pencil, Check, X } from "lucide-react";
 import Link from "next/link";
-import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import {
+  CustomFieldValueInput,
+  defaultValueForDefinition,
+} from "@/components/CustomFieldValueInput";
 import type {
   CustomFieldDefinitionDto,
   CustomFieldEntityType,
@@ -116,6 +119,17 @@ export function EntityCustomFields({
       .then(setDefinitions)
       .finally(() => setLoading(false));
   }, [entityType]);
+
+  const selectedDefinition = definitions.find((d) => d.id === selectedDefinitionId);
+
+  useEffect(() => {
+    if (!adding) return;
+    setNewValue(defaultValueForDefinition(selectedDefinition));
+  }, [adding, selectedDefinitionId, selectedDefinition]);
+
+  function getDefinition(definitionId: string) {
+    return definitions.find((d) => d.id === definitionId);
+  }
 
   function updateDraft(next: FieldRow[]) {
     setValues(next);
@@ -248,7 +262,9 @@ export function EntityCustomFields({
             type="button"
             onClick={() => {
               setAdding(true);
-              setSelectedDefinitionId(availableDefinitions[0]?.id ?? "");
+              const first = availableDefinitions[0];
+              setSelectedDefinitionId(first?.id ?? "");
+              setNewValue(defaultValueForDefinition(first));
               setError(null);
             }}
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:opacity-80"
@@ -280,7 +296,12 @@ export function EntityCustomFields({
               {editingId === field.id ? (
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-slate-400">{field.label}</p>
-                  <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} autoFocus />
+                  <CustomFieldValueInput
+                    definition={getDefinition(field.definitionId)}
+                    value={editValue}
+                    onChange={setEditValue}
+                    autoFocus
+                  />
                   <div className="flex gap-2">
                     <Button
                       type="button"
@@ -347,7 +368,11 @@ export function EntityCustomFields({
             <label className="block text-xs font-medium text-slate-500">Поле</label>
             <select
               value={selectedDefinitionId}
-              onChange={(e) => setSelectedDefinitionId(e.target.value)}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setSelectedDefinitionId(nextId);
+                setNewValue(defaultValueForDefinition(definitions.find((d) => d.id === nextId)));
+              }}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               {availableDefinitions.map((def) => (
@@ -357,11 +382,10 @@ export function EntityCustomFields({
               ))}
             </select>
           </div>
-          <Input
-            label="Значение"
+          <CustomFieldValueInput
+            definition={selectedDefinition}
             value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            placeholder="Введите значение..."
+            onChange={setNewValue}
           />
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={handleAdd} disabled={saving}>

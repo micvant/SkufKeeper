@@ -25,6 +25,8 @@ model CustomFieldDefinition {
   user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   entityType String
   label      String
+  fieldType  String             @default("text")
+  options    String?
   sortOrder  Int                @default(0)
   createdAt  DateTime           @default(now())
   values     CustomFieldValue[]

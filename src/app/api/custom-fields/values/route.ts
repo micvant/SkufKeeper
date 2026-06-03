@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestUserId } from "@/lib/auth";
-import { parseCustomFieldValue } from "@/lib/custom-field";
+import {
+  isValidEnumFieldValue,
+  parseCustomFieldValue,
+  parseOptionsFromDb,
+} from "@/lib/custom-field";
 import { revalidateEntityCustomFieldPaths } from "@/lib/custom-field-revalidate";
 
 export async function POST(request: NextRequest) {
@@ -37,6 +41,13 @@ export async function POST(request: NextRequest) {
     });
     if (!definition) {
       return NextResponse.json({ error: "Поле не найдено" }, { status: 404 });
+    }
+
+    if (definition.fieldType === "enum") {
+      const options = parseOptionsFromDb(definition.options);
+      if (!isValidEnumFieldValue(value, options)) {
+        return NextResponse.json({ error: "Выберите значение из списка" }, { status: 400 });
+      }
     }
 
     if (itemId) {

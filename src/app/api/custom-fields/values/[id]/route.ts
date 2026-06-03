@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestUserId } from "@/lib/auth";
-import { parseCustomFieldValue } from "@/lib/custom-field";
+import { isValidEnumFieldValue, parseCustomFieldValue, parseOptionsFromDb } from "@/lib/custom-field";
 import { revalidateEntityCustomFieldPaths } from "@/lib/custom-field-revalidate";
 
 type Params = { params: Promise<{ id: string }> };
@@ -24,11 +24,23 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         id,
         definition: { userId },
       },
-      select: { id: true, itemId: true, locationId: true },
+      select: {
+        id: true,
+        itemId: true,
+        locationId: true,
+        definition: { select: { fieldType: true, options: true } },
+      },
     });
 
     if (!existing) {
       return NextResponse.json({ error: "Значение не найдено" }, { status: 404 });
+    }
+
+    if (existing.definition.fieldType === "enum") {
+      const options = parseOptionsFromDb(existing.definition.options);
+      if (!isValidEnumFieldValue(value, options)) {
+        return NextResponse.json({ error: "Выберите значение из списка" }, { status: 400 });
+      }
     }
 
     const fieldValue = await prisma.customFieldValue.update({
