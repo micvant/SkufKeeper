@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash2, Pencil, Check, X } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
@@ -25,6 +26,7 @@ interface EntityCustomFieldsProps {
   initialFields?: CustomFieldValueDto[];
   draftFields?: DraftCustomField[];
   onDraftChange?: (fields: DraftCustomField[]) => void;
+  onFieldsChange?: (fields: CustomFieldValueDto[]) => void;
 }
 
 function toRowsFromSaved(fields: CustomFieldValueDto[]): FieldRow[] {
@@ -54,13 +56,24 @@ function toDraft(fields: FieldRow[]): DraftCustomField[] {
   }));
 }
 
+function toSavedDto(rows: FieldRow[]): CustomFieldValueDto[] {
+  return rows.map((field) => ({
+    id: field.id,
+    definitionId: field.definitionId,
+    label: field.label,
+    value: field.value,
+  }));
+}
+
 export function EntityCustomFields({
   entityType,
   entityId,
   initialFields = [],
   draftFields = [],
   onDraftChange,
+  onFieldsChange,
 }: EntityCustomFieldsProps) {
+  const router = useRouter();
   const isDraft = !entityId && !!onDraftChange;
 
   const [values, setValues] = useState<FieldRow[]>(() =>
@@ -79,10 +92,23 @@ export function EntityCustomFields({
   useEffect(() => {
     if (isDraft) {
       setValues(toRowsFromDraft(draftFields));
-    } else {
+    }
+  }, [draftFields, isDraft]);
+
+  useEffect(() => {
+    if (!isDraft && entityId) {
       setValues(toRowsFromSaved(initialFields));
     }
-  }, [initialFields, draftFields, isDraft]);
+  }, [entityId, isDraft]);
+
+  function applySavedValues(updater: FieldRow[] | ((prev: FieldRow[]) => FieldRow[])) {
+    setValues((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      onFieldsChange?.(toSavedDto(next));
+      router.refresh();
+      return next;
+    });
+  }
 
   useEffect(() => {
     fetch(`/api/custom-fields/definitions?entityType=${entityType}`)
@@ -140,7 +166,7 @@ export function EntityCustomFields({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Ошибка");
 
-      setValues((prev) => [...prev, data]);
+      applySavedValues((prev) => [...prev, data]);
       setAdding(false);
       setSelectedDefinitionId("");
       setNewValue("");
@@ -176,7 +202,7 @@ export function EntityCustomFields({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Ошибка");
 
-      setValues((prev) => prev.map((v) => (v.id === id ? data : v)));
+      applySavedValues((prev) => prev.map((v) => (v.id === id ? data : v)));
       setEditingId(null);
       setEditValue("");
     } catch (err) {
@@ -201,7 +227,7 @@ export function EntityCustomFields({
         const data = await res.json();
         throw new Error(data.error || "Ошибка");
       }
-      setValues((prev) => prev.filter((v) => v.id !== id));
+      applySavedValues((prev) => prev.filter((v) => v.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка");
     } finally {

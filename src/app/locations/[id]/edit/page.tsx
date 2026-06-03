@@ -75,6 +75,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
 
       if (!res.ok) throw new Error(data.error || "Ошибка");
 
+      router.refresh();
       router.push(`/locations/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка");
@@ -144,6 +145,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
           entityType="location"
           entityId={id}
           initialFields={customFields}
+          onFieldsChange={setCustomFields}
         />
 
         {error && (

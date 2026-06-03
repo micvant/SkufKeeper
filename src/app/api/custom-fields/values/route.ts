@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestUserId } from "@/lib/auth";
 import { parseCustomFieldValue } from "@/lib/custom-field";
+import { revalidateEntityCustomFieldPaths } from "@/lib/custom-field-revalidate";
 
 export async function POST(request: NextRequest) {
   const userId = await getRequestUserId(request);
@@ -69,6 +70,8 @@ export async function POST(request: NextRequest) {
         definition: { select: { label: true } },
       },
     });
+
+    revalidateEntityCustomFieldPaths(itemId, locationId);
 
     return NextResponse.json({
       id: fieldValue.id,

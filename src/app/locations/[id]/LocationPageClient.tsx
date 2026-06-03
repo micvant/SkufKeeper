@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -48,7 +48,13 @@ interface LocationPageClientProps {
 export function LocationPageClient({ location: initialLocation }: LocationPageClientProps) {
   const router = useRouter();
   const [location, setLocation] = useState(initialLocation);
+  const [customFields, setCustomFields] = useState(initialLocation.customFields ?? []);
   const id = location.id;
+
+  useEffect(() => {
+    setLocation(initialLocation);
+    setCustomFields(initialLocation.customFields ?? []);
+  }, [initialLocation]);
   const [deleting, setDeleting] = useState(false);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [sections, setSections] = useState<Record<SectionKey, boolean>>({
@@ -183,7 +189,7 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
           </section>
         )}
 
-        <CustomFieldsDisplay fields={location.customFields ?? []} />
+        <CustomFieldsDisplay fields={customFields} />
 
         <div className="flex items-center justify-between px-1">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Содержимое</p>

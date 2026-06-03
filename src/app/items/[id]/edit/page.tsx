@@ -88,6 +88,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
 
       if (!res.ok) throw new Error(data.error || "Ошибка");
 
+      router.refresh();
       router.push(`/items/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка");
@@ -162,6 +163,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           entityType="item"
           entityId={id}
           initialFields={customFields}
+          onFieldsChange={setCustomFields}
         />
 
         {error && (

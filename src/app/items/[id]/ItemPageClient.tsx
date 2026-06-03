@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -30,6 +30,11 @@ interface ItemPageClientProps {
 export function ItemPageClient({ item }: ItemPageClientProps) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+  const [customFields, setCustomFields] = useState(item.customFields ?? []);
+
+  useEffect(() => {
+    setCustomFields(item.customFields ?? []);
+  }, [item.id, item.customFields]);
   const quantityLabel = formatItemQuantity(item.quantity, parseItemUnit(item.unit));
 
   async function handleDelete() {
@@ -104,7 +109,7 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
           </section>
         )}
 
-        <CustomFieldsDisplay fields={item.customFields ?? []} />
+        <CustomFieldsDisplay fields={customFields} />
 
         <div className="hidden gap-2 md:flex">
           <Link href={`/items/${item.id}/edit`} className="flex-1">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestUserId } from "@/lib/auth";
 import { parseCustomFieldValue } from "@/lib/custom-field";
+import { revalidateEntityCustomFieldPaths } from "@/lib/custom-field-revalidate";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -23,7 +24,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         id,
         definition: { userId },
       },
-      select: { id: true },
+      select: { id: true, itemId: true, locationId: true },
     });
 
     if (!existing) {
@@ -40,6 +41,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         definition: { select: { label: true } },
       },
     });
+
+    revalidateEntityCustomFieldPaths(existing.itemId, existing.locationId);
 
     return NextResponse.json({
       id: fieldValue.id,
@@ -64,7 +67,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
       id,
       definition: { userId },
     },
-    select: { id: true },
+    select: { id: true, itemId: true, locationId: true },
   });
 
   if (!existing) {
@@ -72,5 +75,6 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
   }
 
   await prisma.customFieldValue.delete({ where: { id: existing.id } });
+  revalidateEntityCustomFieldPaths(existing.itemId, existing.locationId);
   return NextResponse.json({ success: true });
 }
