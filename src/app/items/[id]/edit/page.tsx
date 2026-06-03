@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/Textarea";
 import { QuantityField } from "@/components/QuantityField";
 import { DEFAULT_ITEM_UNIT, parseItemUnit, type ItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
+import { CustomFieldInput } from "@/components/CustomFieldInput";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import type { Item, StorageLocation } from "@/types";
 
 export default function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,6 +31,8 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const [customFieldValue, setCustomFieldValue] = useState("");
+  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id: itemId }) => {
@@ -48,6 +52,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           itemData.iconName && isValidIconName(itemData.iconName) ? itemData.iconName : null
         );
         setLocations(locationsData);
+        setCustomFieldValue(itemData.customFieldValue ?? "");
       }).finally(() => setFetching(false));
     });
   }, [params]);
@@ -69,6 +74,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       formData.append("quantity", quantity);
       formData.append("unit", unit);
       formData.append("locationId", locationId);
+      formData.append("customFieldValue", customFieldValue.trim());
       if (photo) formData.append("photo", photo);
       if (removePhoto) formData.append("removePhoto", "true");
       if (!photo && (!currentPhoto || removePhoto)) {
@@ -137,6 +143,12 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <CustomFieldInput
+          label={settings?.itemCustomFieldLabel}
+          value={customFieldValue}
+          onChange={setCustomFieldValue}
         />
 
         <PhotoUpload

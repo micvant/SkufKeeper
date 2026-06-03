@@ -10,6 +10,7 @@ import { EntityIcon } from "@/components/EntityIcon";
 import { DEFAULT_ITEM_ICON } from "@/lib/icons";
 import { formatItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import type { Item } from "@/types";
 
 export default function ItemPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,6 +19,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id: itemId }) => {
@@ -97,6 +99,13 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
             <div>
               <p className="text-sm text-slate-500">Описание</p>
               <p className="text-slate-700">{item.description}</p>
+            </div>
+          )}
+
+          {item.customFieldValue && settings?.itemCustomFieldLabel && (
+            <div>
+              <p className="text-sm text-slate-500">{settings.itemCustomFieldLabel}</p>
+              <p className="text-slate-700">{item.customFieldValue}</p>
             </div>
           )}
 

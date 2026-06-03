@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseItemQuantity, parseItemUnit } from "@/lib/item-units";
+import { parseCustomFieldValue } from "@/lib/custom-field";
 import { getRequestUserId } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
     const unit = parseItemUnit(formData.get("unit") as string | null);
     const photo = formData.get("photo") as File | null;
     const iconNameInput = parseIconField(formData.get("iconName"));
+    const customFieldValue = parseCustomFieldValue(formData.get("customFieldValue"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     const item = await prisma.item.create({
-      data: { name, description, locationId, quantity, unit, photoPath, iconName, userId },
+      data: { name, description, locationId, quantity, unit, photoPath, iconName, customFieldValue, userId },
       include: { location: { select: { id: true, name: true } } },
     });
 

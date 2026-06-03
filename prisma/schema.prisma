@@ -12,6 +12,8 @@ model User {
   email        String            @unique
   passwordHash String
   appTheme     String            @default("emerald")
+  itemCustomFieldLabel     String?
+  locationCustomFieldLabel String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   locations    StorageLocation[]
@@ -27,6 +29,7 @@ model StorageLocation {
   photoPath   String?
   iconName    String?
   color       String?
+  customFieldValue String?
   parentId    String?
   parent      StorageLocation?  @relation("LocationTree", fields: [parentId], references: [id], onDelete: Cascade)
   children    StorageLocation[] @relation("LocationTree")
@@ -48,6 +51,7 @@ model Item {
   iconName    String?
   quantity    Float    @default(1)
   unit        String   @default("pcs")
+  customFieldValue String?
   locationId  String
   location    StorageLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())

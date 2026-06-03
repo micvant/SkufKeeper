@@ -6,6 +6,7 @@ export interface StorageLocation {
   photoPath: string | null;
   iconName: string | null;
   color: string | null;
+  customFieldValue: string | null;
   parentId: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -23,6 +24,7 @@ export interface Item {
   iconName: string | null;
   quantity: number;
   unit: string;
+  customFieldValue: string | null;
   locationId: string;
   createdAt: string | Date;
   updatedAt: string | Date;

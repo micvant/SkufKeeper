@@ -12,6 +12,8 @@ import type { LocationColorSlug } from "@/lib/colors";
 import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { CustomFieldInput } from "@/components/CustomFieldInput";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import type { StorageLocation } from "@/types";
 
 export default function NewChildLocationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,6 +28,8 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [created, setCreated] = useState<StorageLocation | null>(null);
+  const [customFieldValue, setCustomFieldValue] = useState("");
+  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -51,6 +55,7 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
       formData.append("name", name.trim());
       formData.append("parentId", parentId);
       if (description.trim()) formData.append("description", description.trim());
+      if (customFieldValue.trim()) formData.append("customFieldValue", customFieldValue.trim());
       if (photo) formData.append("photo", photo);
       else {
         formData.append("iconName", iconName ?? "");
@@ -126,6 +131,12 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+        />
+
+        <CustomFieldInput
+          label={settings?.locationCustomFieldLabel}
+          value={customFieldValue}
+          onChange={setCustomFieldValue}
         />
 
         <PhotoUpload onPhotoChange={setPhoto} label="Фото места" />

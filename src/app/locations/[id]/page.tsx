@@ -14,6 +14,7 @@ import { EntityIcon } from "@/components/EntityIcon";
 import { getLocationColorStyles } from "@/lib/colors";
 import { DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import type { StorageLocation } from "@/types";
 
 type SectionKey = "qr" | "children" | "items";
@@ -30,6 +31,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
     children: false,
     items: false,
   });
+  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id: locationId }) => {
@@ -153,6 +155,13 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
 
         {location.description && (
           <p className="mb-6 text-slate-600">{location.description}</p>
+        )}
+
+        {location.customFieldValue && settings?.locationCustomFieldLabel && (
+          <div className="mb-6">
+            <p className="text-sm text-slate-500">{settings.locationCustomFieldLabel}</p>
+            <p className="text-slate-700">{location.customFieldValue}</p>
+          </div>
         )}
 
         <div className="mb-4 flex flex-wrap items-center gap-2">

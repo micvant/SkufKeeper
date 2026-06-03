@@ -2,6 +2,7 @@ export const ITEM_UNITS = {
   pcs: { label: "Штуки", short: "шт.", step: 1, decimals: 0 },
   kg: { label: "Килограммы", short: "кг", step: 0.001, decimals: 3 },
   l: { label: "Литры", short: "л", step: 0.001, decimals: 3 },
+  ml: { label: "Миллилитры", short: "мл", step: 1, decimals: 0 },
   mg: { label: "Миллиграммы", short: "мг", step: 1, decimals: 0 },
 } as const;
 
