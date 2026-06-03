@@ -68,7 +68,7 @@ export default function NewLocationPage() {
         <div className="mx-auto max-w-lg space-y-5 px-4 py-6 md:px-8">
           <div className="rounded-2xl bg-white p-4 text-center shadow-sm">
             <p className="text-lg font-semibold text-slate-900">{created.name}</p>
-            <p className="mt-1 text-sm text-emerald-600">Место хранения успешно добавлено</p>
+            <p className="mt-1 text-sm text-primary">Место хранения успешно добавлено</p>
           </div>
 
           <LocationQRCode qrToken={created.qrToken} locationName={created.name} />

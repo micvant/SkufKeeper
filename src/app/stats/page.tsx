@@ -99,7 +99,7 @@ export default function StatsPage() {
 
         <Link
           href="/"
-          className="mt-6 block text-center text-sm text-emerald-600 hover:text-emerald-700"
+          className="mt-6 block text-center text-sm text-primary hover:text-primary-hover"
         >
           На главную
         </Link>
@@ -119,7 +119,7 @@ function StatCard({
 }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <Icon className="h-5 w-5 text-emerald-600" />
+      <Icon className="h-5 w-5 text-primary" />
       <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
       <p className="text-xs text-slate-500">{label}</p>
     </div>

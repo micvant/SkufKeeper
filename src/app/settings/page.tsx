@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useAppTheme();
+  const { theme, setTheme, saving } = useAppTheme();
   const router = useRouter();
 
   async function handleLogout() {
@@ -25,7 +25,8 @@ export default function SettingsPage() {
         <section>
           <h2 className="text-sm font-medium text-slate-700">Цвет интерфейса</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Кнопки, ссылки и акценты приложения
+            Сохраняется в вашем аккаунте и синхронизируется между устройствами
+            {saving ? " · сохранение..." : ""}
           </p>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {APP_THEME_IDS.map((id) => {

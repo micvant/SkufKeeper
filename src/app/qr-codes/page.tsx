@@ -76,7 +76,7 @@ export default function QrCodesPage() {
 
         <Link
           href="/scan"
-          className="mt-6 block text-center text-sm text-emerald-600 hover:text-emerald-700"
+          className="mt-6 block text-center text-sm text-primary hover:text-primary-hover"
         >
           Перейти к сканеру
         </Link>

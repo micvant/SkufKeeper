@@ -62,16 +62,16 @@ export function LocationCard({ location, compact = false }: LocationCardProps) {
     return (
       <Link
         href={`/locations/${location.id}`}
-        className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition-all hover:border-emerald-300 active:scale-[0.99]"
+        className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition-all hover:border-primary/30 active:scale-[0.99]"
       >
         <LocationThumb location={location} />
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-emerald-700">
+          <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-primary">
             {location.name}
           </h3>
           <p className="truncate text-xs text-slate-500">{meta}</p>
         </div>
-        <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 group-hover:text-emerald-500" />
+        <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 group-hover:text-primary" />
       </Link>
     );
   }
@@ -79,11 +79,11 @@ export function LocationCard({ location, compact = false }: LocationCardProps) {
   return (
     <Link
       href={`/locations/${location.id}`}
-      className="group flex gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
+      className="group flex gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-primary/30 hover:shadow-md active:scale-[0.99]"
     >
       <LocationThumb location={location} size="md" />
       <div className="min-w-0 flex-1">
-        <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700">
+        <h3 className="font-semibold text-slate-900 group-hover:text-primary">
           {location.name}
         </h3>
         <p className="mt-0.5 text-xs text-slate-500">{meta}</p>
@@ -91,7 +91,7 @@ export function LocationCard({ location, compact = false }: LocationCardProps) {
           <p className="mt-1 line-clamp-2 text-sm text-slate-500">{location.description}</p>
         )}
       </div>
-      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-slate-300 group-hover:text-emerald-500" />
+      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-slate-300 group-hover:text-primary" />
     </Link>
   );
 }
@@ -126,7 +126,7 @@ export function ItemCard({ item, showLocation = false, onDelete, deleting }: Ite
     <div className="flex items-center gap-2">
       <Link
         href={`/items/${item.id}`}
-        className="group flex min-w-0 flex-1 gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md active:scale-[0.99]"
+        className="group flex min-w-0 flex-1 gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-primary/30 hover:shadow-md active:scale-[0.99]"
       >
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
           {item.photoPath ? (
@@ -136,12 +136,12 @@ export function ItemCard({ item, showLocation = false, onDelete, deleting }: Ite
               iconName={item.iconName}
               fallback={DEFAULT_ITEM_ICON}
               className="h-full w-full"
-              iconClassName="h-6 w-6 text-emerald-500"
+              iconClassName="h-6 w-6 text-primary"
             />
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-medium text-slate-900 group-hover:text-emerald-700">
+          <h3 className="truncate font-medium text-slate-900 group-hover:text-primary">
             {item.name}
           </h3>
           {item.quantity != null &&
@@ -151,7 +151,7 @@ export function ItemCard({ item, showLocation = false, onDelete, deleting }: Ite
             </p>
           )}
           {showLocation && item.location && (
-            <p className="mt-0.5 truncate text-xs text-emerald-600">{item.location.name}</p>
+            <p className="mt-0.5 truncate text-xs text-primary">{item.location.name}</p>
           )}
           {item.description && (
             <p className="mt-0.5 line-clamp-1 text-xs text-slate-500">{item.description}</p>

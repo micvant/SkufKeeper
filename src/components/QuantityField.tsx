@@ -28,12 +28,12 @@ export function QuantityField({
           step={config.step}
           value={quantity}
           onChange={(e) => onQuantityChange(e.target.value)}
-          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
         <select
           value={unit}
           onChange={(e) => onUnitChange(e.target.value as ItemUnit)}
-          className="w-[min(100%,11rem)] rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+          className="w-[min(100%,11rem)] rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           {ITEM_UNIT_IDS.map((id) => (
             <option key={id} value={id}>

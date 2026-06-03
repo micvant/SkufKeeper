@@ -53,7 +53,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
     return (
       <div className="px-4 py-20 text-center">
         <p className="text-slate-500">Объект не найден</p>
-        <Link href="/" className="mt-4 inline-block text-emerald-600">
+        <Link href="/" className="mt-4 inline-block text-primary">
           На главную
         </Link>
       </div>
@@ -80,7 +80,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
             <EntityIcon
               iconName={item.iconName}
               fallback={DEFAULT_ITEM_ICON}
-              iconClassName="h-20 w-20 text-emerald-500"
+              iconClassName="h-20 w-20 text-primary"
             />
           </div>
         )}
@@ -103,7 +103,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
           {item.location && (
             <Link
               href={`/locations/${item.location.id}`}
-              className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-emerald-700 transition-colors hover:bg-emerald-100"
+              className="flex items-center gap-2 rounded-xl bg-primary-light px-4 py-3 text-primary transition-colors hover:bg-primary-muted"
             >
               <MapPin className="h-4 w-4" />
               <span className="text-sm font-medium">{item.location.name}</span>

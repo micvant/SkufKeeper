@@ -11,35 +11,95 @@ import {
 interface ThemeContextValue {
   theme: AppThemeId;
   setTheme: (theme: AppThemeId) => void;
+  saving: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: DEFAULT_APP_THEME,
   setTheme: () => {},
+  saving: false,
 });
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<AppThemeId>(DEFAULT_APP_THEME);
+function applyTheme(theme: AppThemeId) {
+  document.documentElement.setAttribute("data-app-theme", theme);
+}
+
+export function ThemeProvider({
+  children,
+  initialTheme = DEFAULT_APP_THEME,
+}: {
+  children: React.ReactNode;
+  initialTheme?: AppThemeId;
+}) {
+  const [theme, setThemeState] = useState<AppThemeId>(initialTheme);
+  const [saving, setSaving] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(APP_THEME_STORAGE_KEY);
-    setThemeState(parseAppTheme(stored));
+    applyTheme(initialTheme);
+    setThemeState(initialTheme);
     setReady(true);
-  }, []);
+  }, [initialTheme]);
 
   useEffect(() => {
     if (!ready) return;
-    document.documentElement.setAttribute("data-app-theme", theme);
-    localStorage.setItem(APP_THEME_STORAGE_KEY, theme);
+
+    fetch("/api/user/settings")
+      .then(async (res) => {
+        if (res.ok) {
+          const data = (await res.json()) as { appTheme?: string };
+          const serverTheme = parseAppTheme(data.appTheme);
+          setThemeState(serverTheme);
+          applyTheme(serverTheme);
+          localStorage.setItem(APP_THEME_STORAGE_KEY, serverTheme);
+          return;
+        }
+
+        const stored = localStorage.getItem(APP_THEME_STORAGE_KEY);
+        const localTheme = parseAppTheme(stored);
+        setThemeState(localTheme);
+        applyTheme(localTheme);
+      })
+      .catch(() => {
+        const stored = localStorage.getItem(APP_THEME_STORAGE_KEY);
+        const localTheme = parseAppTheme(stored);
+        setThemeState(localTheme);
+        applyTheme(localTheme);
+      });
+  }, [ready]);
+
+  useEffect(() => {
+    if (!ready) return;
+    applyTheme(theme);
   }, [theme, ready]);
 
-  function setTheme(next: AppThemeId) {
+  async function setTheme(next: AppThemeId) {
     setThemeState(next);
+    applyTheme(next);
+    localStorage.setItem(APP_THEME_STORAGE_KEY, next);
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/user/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ appTheme: next }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { appTheme?: string };
+      const saved = parseAppTheme(data.appTheme);
+      setThemeState(saved);
+      applyTheme(saved);
+      localStorage.setItem(APP_THEME_STORAGE_KEY, saved);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={{ theme, setTheme, saving }}>
+      {children}
+    </ThemeContext.Provider>
   );
 }
 

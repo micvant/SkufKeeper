@@ -122,7 +122,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           <select
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             {locations.map((loc) => (
               <option key={loc.id} value={loc.id}>

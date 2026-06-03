@@ -70,7 +70,7 @@ export function PhotoUpload({
           onClick={() => inputRef.current?.click()}
           className={cn(
             "flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200",
-            "bg-slate-50 py-8 text-slate-500 transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 hover:text-emerald-600"
+            "bg-slate-50 py-8 text-slate-500 transition-colors hover:border-primary/40 hover:bg-primary-light/50 hover:text-primary"
           )}
         >
           <Camera className="h-8 w-8" />

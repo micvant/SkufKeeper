@@ -59,7 +59,7 @@ export function IconPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-emerald-300 hover:bg-slate-50"
+        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-primary/30 hover:bg-slate-50"
       >
         <div
           className={cn(
@@ -108,8 +108,8 @@ export function IconPicker({
                       className={cn(
                         "flex aspect-square items-center justify-center rounded-xl border-2 transition-colors",
                         isSelected
-                          ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                          : "border-slate-200 bg-white text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/50"
+                          ? "border-primary bg-primary-light text-primary"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-primary/30 hover:bg-primary-light/50"
                       )}
                       title={name}
                     >

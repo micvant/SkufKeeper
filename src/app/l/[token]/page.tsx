@@ -39,7 +39,7 @@ export default function QrRedirectPage({ params }: { params: Promise<{ token: st
         <Header title="QR-код" backHref="/scan" />
         <div className="px-4 py-20 text-center">
           <p className="text-slate-500">Место хранения не найдено</p>
-          <Link href="/scan" className="mt-4 inline-block text-emerald-600">
+          <Link href="/scan" className="mt-4 inline-block text-primary">
             К сканеру
           </Link>
         </div>

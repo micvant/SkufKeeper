@@ -75,7 +75,7 @@ export function LocationQRCode({
       className={
         embedded
           ? undefined
-          : "rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5"
+          : "rounded-2xl border border-primary/20 bg-primary-light/50 p-5"
       }
     >
       {showLabel && (
@@ -97,7 +97,7 @@ export function LocationQRCode({
       {locationId && (
         <Link
           href={`/locations/${locationId}`}
-          className="mt-2 flex items-center justify-center gap-1 text-xs text-emerald-600 hover:text-emerald-700"
+          className="mt-2 flex items-center justify-center gap-1 text-xs text-primary hover:text-primary-hover"
         >
           <ExternalLink className="h-3 w-3" />
           Открыть место

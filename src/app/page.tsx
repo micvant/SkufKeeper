@@ -125,7 +125,7 @@ export default async function HomePage() {
             </p>
             <Link
               href="/locations/new"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-hover"
             >
               <Plus className="h-4 w-4" />
               Добавить место

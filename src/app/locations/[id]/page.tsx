@@ -105,7 +105,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
     return (
       <div className="px-4 py-20 text-center">
         <p className="text-slate-500">Место не найдено</p>
-        <Link href="/" className="mt-4 inline-block text-emerald-600">
+        <Link href="/" className="mt-4 inline-block text-primary">
           На главную
         </Link>
       </div>

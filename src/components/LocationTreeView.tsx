@@ -82,9 +82,9 @@ function TreeLocationNode({
           className="group min-w-0 flex-1 px-1 py-2"
         >
           <div className="flex items-start gap-2">
-            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <div className="min-w-0">
-              <span className="font-medium text-slate-900 group-hover:text-emerald-700">
+              <span className="font-medium text-slate-900 group-hover:text-primary">
                 {node.name}
               </span>
               <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
@@ -97,7 +97,7 @@ function TreeLocationNode({
                   </span>
                 )}
                 {node.totalItems > node.directItems && (
-                  <span className="text-emerald-600">
+                  <span className="text-primary">
                     {node.totalItems} всего с вложенными
                   </span>
                 )}
@@ -121,7 +121,7 @@ function TreeLocationNode({
                 <li key={item.id}>
                   <Link
                     href={`/items/${item.id}`}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700"
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-primary-light hover:text-primary"
                   >
                     <Package className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                     <span className="truncate">{item.name}</span>

@@ -50,7 +50,7 @@ export function ColorPicker({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-emerald-300 hover:bg-slate-50"
+        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-primary/30 hover:bg-slate-50"
       >
         <div
           className={cn(
