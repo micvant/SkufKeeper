@@ -19,5 +19,6 @@ echo "Build: $(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
 
 npx prisma db push --accept-data-loss
 node scripts/backfill-qr-tokens.mjs 2>/dev/null || true
+node scripts/warmup-thumbnails.mjs 2>/dev/null || true &
 
 exec next start -H 0.0.0.0 -p "${PORT:-3000}"

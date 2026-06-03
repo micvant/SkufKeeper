@@ -5,6 +5,30 @@ import { getUploadDir, resolveUploadFilename } from "@/lib/upload";
 
 const MAX_UPLOAD_WIDTH = 1600;
 const MAX_THUMB_API_WIDTH = 1200;
+const MAX_CONCURRENT_RESIZE = 2;
+
+let activeResizes = 0;
+const resizeWaiters: Array<() => void> = [];
+
+async function acquireResizeSlot(): Promise<void> {
+  if (activeResizes < MAX_CONCURRENT_RESIZE) {
+    activeResizes += 1;
+    return;
+  }
+
+  await new Promise<void>((resolve) => {
+    resizeWaiters.push(() => {
+      activeResizes += 1;
+      resolve();
+    });
+  });
+}
+
+function releaseResizeSlot(): void {
+  activeResizes -= 1;
+  const next = resizeWaiters.shift();
+  if (next) next();
+}
 
 export async function processUploadedImage(buffer: Buffer): Promise<Buffer> {
   return sharp(buffer)
@@ -34,18 +58,27 @@ export async function readOrCreateResizedImage(
   try {
     return await readFile(cachePath);
   } catch {
-    const original = await readFile(originalPath);
-    const resized = await sharp(original)
-      .rotate()
-      .resize(safeWidth, safeWidth, {
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .webp({ quality: 80 })
-      .toBuffer();
+    await acquireResizeSlot();
+    try {
+      try {
+        return await readFile(cachePath);
+      } catch {
+        const original = await readFile(originalPath);
+        const resized = await sharp(original)
+          .rotate()
+          .resize(safeWidth, safeWidth, {
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 80 })
+          .toBuffer();
 
-    await writeFile(cachePath, resized).catch(() => {});
-    return resized;
+        await writeFile(cachePath, resized).catch(() => {});
+        return resized;
+      }
+    } finally {
+      releaseResizeSlot();
+    }
   }
 }
 
