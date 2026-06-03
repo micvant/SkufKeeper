@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight, Trash2 } from "lucide-react";
 import { EntityIcon } from "@/components/EntityIcon";
 import { DEFAULT_ITEM_ICON, DEFAULT_LOCATION_ICON } from "@/lib/icons";
+import { getUploadImageUrl, THUMB_WIDTH } from "@/lib/image-url";
 import {
   formatItemQuantity,
   parseItemUnit,
@@ -29,9 +30,11 @@ function LocationThumb({
     <div className={`relative shrink-0 overflow-hidden ${box}`}>
       {location.photoPath ? (
         <Image
-          src={location.photoPath}
+          src={getUploadImageUrl(location.photoPath, THUMB_WIDTH)!}
           alt=""
           fill
+          sizes={`${size === "sm" ? "40px" : "44px"}`}
+          loading="lazy"
           className="object-cover bg-slate-100"
           unoptimized
         />
@@ -130,7 +133,15 @@ export function ItemCard({ item, showLocation = false, onDelete, deleting }: Ite
       >
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
           {item.photoPath ? (
-            <Image src={item.photoPath} alt={item.name} fill className="object-cover" unoptimized />
+            <Image
+              src={getUploadImageUrl(item.photoPath, THUMB_WIDTH)!}
+              alt={item.name}
+              fill
+              sizes="56px"
+              loading="lazy"
+              className="object-cover"
+              unoptimized
+            />
           ) : (
             <EntityIcon
               iconName={item.iconName}

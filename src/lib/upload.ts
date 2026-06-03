@@ -1,6 +1,7 @@
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { deleteResizedCacheFiles, processUploadedImage } from "@/lib/image-process";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -37,10 +38,11 @@ export async function saveUploadedFile(file: File): Promise<string> {
   const uploadDir = getUploadDir();
   await mkdir(uploadDir, { recursive: true });
 
-  const ext = path.extname(file.name) || ".jpg";
+  const ext = ".jpg";
   const filename = `${randomUUID()}${ext}`;
   const filepath = path.join(uploadDir, filename);
-  const buffer = Buffer.from(await file.arrayBuffer());
+  const rawBuffer = Buffer.from(await file.arrayBuffer());
+  const buffer = await processUploadedImage(rawBuffer);
 
   await writeFile(filepath, buffer);
 
@@ -55,6 +57,7 @@ export async function deleteUploadedFile(photoPath: string | null | undefined): 
 
   try {
     await unlink(filepath);
+    await deleteResizedCacheFiles(photoPath);
   } catch {
     // file may already be deleted
   }
