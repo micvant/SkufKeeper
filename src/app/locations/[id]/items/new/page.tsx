@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { QuantityField } from "@/components/QuantityField";
+import { StockFields } from "@/components/StockFields";
+import { VoiceNameInput } from "@/components/VoiceNameInput";
 import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, type ItemUnit } from "@/lib/item-units";
 import { persistCustomFieldDrafts, type DraftCustomField } from "@/lib/custom-field";
@@ -25,6 +27,8 @@ export default function NewItemPage({
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [unit, setUnit] = useState<ItemUnit>(DEFAULT_ITEM_UNIT);
+  const [minQuantity, setMinQuantity] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
@@ -58,6 +62,8 @@ export default function NewItemPage({
       formData.append("quantity", quantity);
       formData.append("unit", unit);
       if (description.trim()) formData.append("description", description.trim());
+      if (minQuantity.trim()) formData.append("minQuantity", minQuantity.trim());
+      if (expiresAt) formData.append("expiresAt", expiresAt);
       if (photo) formData.append("photo", photo);
       else if (iconName) formData.append("iconName", iconName);
 
@@ -83,20 +89,34 @@ export default function NewItemPage({
       <Header title="Новый объект" backHref={`/locations/${locationId || "..."}`} />
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-5 px-4 py-6 md:px-8">
-        <Input
-          label="Название"
-          placeholder="Например: Отвёртка крестовая"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          autoFocus
-        />
+        <div className="flex gap-2">
+          <div className="min-w-0 flex-1">
+            <Input
+              label="Название"
+              placeholder="Например: Отвёртка крестовая"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="pt-7">
+            <VoiceNameInput onResult={(text) => setName(text)} />
+          </div>
+        </div>
 
         <QuantityField
           quantity={quantity}
           unit={unit}
           onQuantityChange={setQuantity}
           onUnitChange={setUnit}
+        />
+
+        <StockFields
+          minQuantity={minQuantity}
+          expiresAt={expiresAt}
+          onMinQuantityChange={setMinQuantity}
+          onExpiresAtChange={setExpiresAt}
         />
 
         <Textarea

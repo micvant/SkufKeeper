@@ -12,6 +12,7 @@ mkdir -p "$DATA_DIR/uploads"
 
 export DATABASE_URL="${DATABASE_URL:-file:${DATA_DIR}/dev.db}"
 export UPLOAD_DIR="${UPLOAD_DIR:-$DATA_DIR/uploads}"
+export DATA_DIR="$DATA_DIR"
 
 echo "Using DATABASE_URL=$DATABASE_URL"
 echo "Uploads: $UPLOAD_DIR"
@@ -20,5 +21,7 @@ echo "Build: $(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
 npx prisma db push --accept-data-loss
 node scripts/backfill-qr-tokens.mjs 2>/dev/null || true
 node scripts/warmup-thumbnails.mjs 2>/dev/null || true &
+node scripts/auto-backup.mjs 2>/dev/null &
 
+export DATA_DIR="$DATA_DIR"
 exec next start -H 0.0.0.0 -p "${PORT:-3000}"

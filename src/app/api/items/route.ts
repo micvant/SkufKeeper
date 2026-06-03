@@ -4,30 +4,55 @@ import { saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { getRequestUserId } from "@/lib/auth";
+import { customFieldsInclude, serializeEntityWithCustomFields } from "@/lib/custom-field";
+import { isExpiringSoon, isLowStock, parseExpiresAt, parseMinQuantity } from "@/lib/item-stock";
+import { matchesQuery } from "@/lib/item-search";
 
 export async function GET(request: NextRequest) {
   const userId = await getRequestUserId(request);
   if (!userId) return NextResponse.json({ error: "Требуется вход" }, { status: 401 });
 
-  const query = request.nextUrl.searchParams.get("q")?.trim();
+  const sp = request.nextUrl.searchParams;
+  const q = sp.get("q")?.trim() ?? "";
+  const locationId = sp.get("locationId")?.trim() || undefined;
+  const unit = sp.get("unit")?.trim() || undefined;
+  const lowStock = sp.get("lowStock") === "1" || sp.get("lowStock") === "true";
+  const expiringDays = sp.get("expiringDays") ? Number(sp.get("expiringDays")) : 0;
 
-  if (!query) {
-    return NextResponse.json({ error: "Укажите поисковый запрос" }, { status: 400 });
+  const hasFilter = Boolean(q || locationId || unit || lowStock || expiringDays > 0);
+  if (!hasFilter) {
+    return NextResponse.json({ error: "Укажите запрос или фильтр" }, { status: 400 });
   }
 
-  const lowerQuery = query.toLowerCase();
-  const all_items = await prisma.item.findMany({
-    where: { userId },
+  const items = await prisma.item.findMany({
+    where: {
+      userId,
+      ...(locationId ? { locationId } : {}),
+      ...(unit ? { unit } : {}),
+    },
     include: {
       location: { select: { id: true, name: true } },
+      ...customFieldsInclude,
     },
     orderBy: { name: "asc" },
   });
-  const items = all_items.filter((i) =>
-    i.name.toLowerCase().includes(lowerQuery)
-  );
 
-  return NextResponse.json(items);
+  let result = items.map((i) => serializeEntityWithCustomFields(i));
+
+  if (q) {
+    result = result.filter((item) => matchesQuery(item, q));
+  }
+  if (unit) {
+    result = result.filter((item) => parseItemUnit(item.unit) === unit);
+  }
+  if (lowStock) {
+    result = result.filter((item) => isLowStock(item));
+  }
+  if (expiringDays > 0) {
+    result = result.filter((item) => isExpiringSoon(item, expiringDays));
+  }
+
+  return NextResponse.json(result);
 }
 
 export async function POST(request: NextRequest) {
@@ -41,6 +66,8 @@ export async function POST(request: NextRequest) {
     const locationId = formData.get("locationId") as string;
     const quantity = parseItemQuantity(formData.get("quantity"));
     const unit = parseItemUnit(formData.get("unit") as string | null);
+    const minQuantity = parseMinQuantity(formData.get("minQuantity"));
+    const expiresAt = parseExpiresAt(formData.get("expiresAt"));
     const photo = formData.get("photo") as File | null;
     const iconNameInput = parseIconField(formData.get("iconName"));
 
@@ -65,7 +92,18 @@ export async function POST(request: NextRequest) {
     }
 
     const item = await prisma.item.create({
-      data: { name, description, locationId, quantity, unit, photoPath, iconName, userId },
+      data: {
+        name,
+        description,
+        locationId,
+        quantity,
+        unit,
+        minQuantity,
+        expiresAt,
+        photoPath,
+        iconName,
+        userId,
+      },
       include: { location: { select: { id: true, name: true } } },
     });
 

@@ -6,6 +6,7 @@ import { APP_THEME_IDS, APP_THEMES } from "@/lib/app-theme";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CustomFieldDefinitionsEditor } from "@/components/CustomFieldDefinitionsEditor";
+import { BackupSettings } from "@/components/BackupSettings";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
@@ -72,6 +73,8 @@ export default function SettingsPage() {
           title="Доп. поля для всех мест хранения"
           description="Задайте поля: текст или перечисление с вариантами на выбор."
         />
+
+        <BackupSettings />
 
         <section>
           <h2 className="text-sm font-medium text-slate-700">Аккаунт</h2>

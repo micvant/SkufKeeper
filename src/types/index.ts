@@ -32,6 +32,8 @@ export interface Item {
   iconName: string | null;
   quantity: number;
   unit: string;
+  minQuantity?: number | null;
+  expiresAt?: string | Date | null;
   locationId: string;
   createdAt: string | Date;
   updatedAt: string | Date;

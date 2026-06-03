@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { QuantityField } from "@/components/QuantityField";
+import { StockFields } from "@/components/StockFields";
+import { VoiceNameInput } from "@/components/VoiceNameInput";
 import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, parseItemUnit, type ItemUnit } from "@/lib/item-units";
 import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { Button } from "@/components/ui/Button";
@@ -31,6 +33,8 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const [minQuantity, setMinQuantity] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
   const [customFields, setCustomFields] = useState<CustomFieldValueDto[]>([]);
 
   useEffect(() => {
@@ -49,6 +53,14 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
         setCurrentPhoto(itemData.photoPath);
         setIconName(
           itemData.iconName && isValidIconName(itemData.iconName) ? itemData.iconName : null
+        );
+        setMinQuantity(
+          itemData.minQuantity != null ? String(itemData.minQuantity) : ""
+        );
+        setExpiresAt(
+          itemData.expiresAt
+            ? new Date(itemData.expiresAt).toISOString().slice(0, 10)
+            : ""
         );
         setCustomFields(itemData.customFields ?? []);
         setLocations(locationsData);
@@ -77,6 +89,8 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       formData.append("quantity", quantity);
       formData.append("unit", unit);
       formData.append("locationId", locationId);
+      formData.append("minQuantity", minQuantity.trim());
+      if (expiresAt) formData.append("expiresAt", expiresAt);
       if (photo) formData.append("photo", photo);
       if (removePhoto) formData.append("removePhoto", "true");
       if (!photo && (!currentPhoto || removePhoto)) {
@@ -112,18 +126,32 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       <Header title="Редактировать объект" backHref={`/items/${id}`} />
 
       <form onSubmit={handleSubmit} className="mx-auto max-w-lg space-y-5 px-4 py-6 md:px-8">
-        <Input
-          label="Название"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        <div className="flex gap-2">
+          <div className="min-w-0 flex-1">
+            <Input
+              label="Название"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="pt-7">
+            <VoiceNameInput onResult={(text) => setName(text)} />
+          </div>
+        </div>
 
         <QuantityField
           quantity={quantity}
           unit={unit}
           onQuantityChange={setQuantity}
           onUnitChange={setUnit}
+        />
+
+        <StockFields
+          minQuantity={minQuantity}
+          expiresAt={expiresAt}
+          onMinQuantityChange={setMinQuantity}
+          onExpiresAtChange={setExpiresAt}
         />
 
         <div className="space-y-1.5">

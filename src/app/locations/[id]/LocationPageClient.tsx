@@ -15,7 +15,10 @@ import {
   MapPin,
   ChevronRight,
   ArrowRightLeft,
+  Copy,
 } from "lucide-react";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { cacheLocationForOffline, cacheQrTokenForOffline } from "@/lib/offline-store";
 import Image from "next/image";
 import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
@@ -43,9 +46,13 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 interface LocationPageClientProps {
   location: StorageLocation;
+  isFavorite?: boolean;
 }
 
-export function LocationPageClient({ location: initialLocation }: LocationPageClientProps) {
+export function LocationPageClient({
+  location: initialLocation,
+  isFavorite = false,
+}: LocationPageClientProps) {
   const router = useRouter();
   const [location, setLocation] = useState(initialLocation);
   const [customFields, setCustomFields] = useState(initialLocation.customFields ?? []);
@@ -56,6 +63,18 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
     setCustomFields(initialLocation.customFields ?? []);
   }, [initialLocation]);
   const [deleting, setDeleting] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+
+  useEffect(() => {
+    cacheLocationForOffline({
+      id: location.id,
+      qrToken: location.qrToken,
+      name: location.name,
+    });
+    if (location.qrToken) {
+      cacheQrTokenForOffline(location.qrToken, location.id);
+    }
+  }, [location.id, location.qrToken, location.name]);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [sections, setSections] = useState<Record<SectionKey, boolean>>({
     qr: false,
@@ -92,6 +111,20 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
     }
   }
 
+  async function handleDuplicate() {
+    setDuplicating(true);
+    try {
+      const res = await fetch(`/api/locations/${id}/duplicate`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      router.push(`/locations/${data.id}`);
+    } catch {
+      alert("Не удалось создать копию");
+    } finally {
+      setDuplicating(false);
+    }
+  }
+
   async function handleDelete() {
     const hasChildren = (location.children?.length ?? 0) > 0;
     const message = hasChildren
@@ -117,6 +150,20 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
       <Header title={location.name} backHref={backHref} />
 
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-3 px-4 py-4 md:max-w-2xl md:px-8 md:py-6">
+        <div className="flex justify-end gap-2">
+          <FavoriteButton locationId={id} initialFavorite={isFavorite} />
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={duplicating}
+            onClick={handleDuplicate}
+          >
+            <Copy className="h-4 w-4" />
+            {duplicating ? "…" : "Копия"}
+          </Button>
+        </div>
+
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {location.photoPath ? (
             <div className="relative aspect-[16/10] max-h-48 w-full bg-slate-100">

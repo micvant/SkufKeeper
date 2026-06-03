@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Sidebar } from "@/components/Navigation";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SwipeBackHandler } from "@/components/SwipeBackHandler";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { getCurrentUserId } from "@/lib/auth";
 import { DEFAULT_APP_THEME, parseAppTheme } from "@/lib/app-theme";
 import { prisma } from "@/lib/prisma";
@@ -49,6 +51,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="ru" data-app-theme={initialTheme} suppressHydrationWarning>
       <body className="min-h-dvh overflow-x-hidden">
         <ThemeProvider initialTheme={initialTheme}>
+          <SwipeBackHandler />
+          <ServiceWorkerRegister />
           <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
             <Sidebar />
             <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">

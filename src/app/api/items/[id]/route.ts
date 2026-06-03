@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseItemQuantity, parseItemUnit } from "@/lib/item-units";
+import { parseExpiresAt, parseMinQuantity } from "@/lib/item-stock";
+import { createItemMoveLog } from "@/lib/item-move-log";
 import { customFieldsInclude, serializeEntityWithCustomFields } from "@/lib/custom-field";
 import { getRequestUserId } from "@/lib/auth";
 
@@ -47,6 +49,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const locationId = formData.get("locationId") as string;
     const quantity = parseItemQuantity(formData.get("quantity"));
     const unit = parseItemUnit(formData.get("unit") as string | null);
+    const minQuantity = parseMinQuantity(formData.get("minQuantity"));
+    const expiresAt = parseExpiresAt(formData.get("expiresAt"));
     const photo = formData.get("photo") as File | null;
     const removePhoto = formData.get("removePhoto") === "true";
     const iconNameInput = parseIconField(formData.get("iconName"));
@@ -81,12 +85,44 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     const item = await prisma.item.update({
       where: { id: existing.id },
-      data: { name, description, locationId, quantity, unit, photoPath, iconName },
+      data: {
+        name,
+        description,
+        locationId,
+        quantity,
+        unit,
+        minQuantity,
+        expiresAt,
+        photoPath,
+        iconName,
+      },
       include: {
         location: { select: { id: true, name: true } },
         ...customFieldsInclude,
       },
     });
+
+    if (existing.locationId !== locationId) {
+      const [fromLoc, toLoc] = await Promise.all([
+        prisma.storageLocation.findUnique({
+          where: { id: existing.locationId },
+          select: { name: true },
+        }),
+        prisma.storageLocation.findUnique({
+          where: { id: locationId },
+          select: { name: true },
+        }),
+      ]);
+      await createItemMoveLog({
+        userId,
+        itemId: existing.id,
+        fromLocationId: existing.locationId,
+        fromLocationName: fromLoc?.name ?? null,
+        toLocationId: locationId,
+        toLocationName: toLoc?.name ?? "",
+        comment: null,
+      });
+    }
 
     return NextResponse.json(serializeEntityWithCustomFields(item));
   } catch (error) {

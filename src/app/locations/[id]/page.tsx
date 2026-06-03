@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUserId } from "@/lib/auth";
 import { getLocationById } from "@/lib/queries/entities";
+import { isLocationFavorite } from "@/lib/queries/home";
 import { redirect } from "next/navigation";
 import { LocationPageClient } from "./LocationPageClient";
 
@@ -22,5 +23,7 @@ export default async function LocationPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  return <LocationPageClient location={location} />;
+  const isFavorite = await isLocationFavorite(userId, id);
+
+  return <LocationPageClient location={location} isFavorite={isFavorite} />;
 }

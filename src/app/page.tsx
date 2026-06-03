@@ -6,7 +6,10 @@ import { LocationCard } from "@/components/Cards";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/auth";
 import { formatQuantityTotalsSummary, sumQuantitiesByUnit } from "@/lib/item-units";
+import { getFavoriteLocations, getStockAlerts } from "@/lib/queries/home";
+import { HomeAlerts } from "@/components/HomeAlerts";
 import { redirect } from "next/navigation";
+import { Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +19,7 @@ export default async function HomePage() {
     redirect("/login");
   }
 
-  const [allLocations, totalItems, allItemQuantities] = await Promise.all([
+  const [allLocations, totalItems, allItemQuantities, favorites, alerts] = await Promise.all([
     prisma.storageLocation.findMany({
       where: { userId },
       include: { _count: { select: { items: true, children: true } } },
@@ -27,6 +30,8 @@ export default async function HomePage() {
       where: { userId },
       select: { quantity: true, unit: true },
     }),
+    getFavoriteLocations(userId),
+    getStockAlerts(userId),
   ]);
 
   const globalQuantitySummary = formatQuantityTotalsSummary(
@@ -130,6 +135,22 @@ export default async function HomePage() {
             Поиск
           </Link>
         </div>
+
+        <HomeAlerts lowStock={alerts.lowStock} expiringSoon={alerts.expiringSoon} />
+
+        {favorites.length > 0 && (
+          <>
+            <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-amber-600">
+              <Star className="h-3.5 w-3.5 fill-current" />
+              Избранное
+            </p>
+            <div className="mb-6 space-y-2">
+              {favorites.map((location) => (
+                <LocationCard key={location.id} location={location} compact />
+              ))}
+            </div>
+          </>
+        )}
 
         {rootLocations.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-10 text-center md:p-12">
