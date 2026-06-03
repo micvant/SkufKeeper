@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       id: true,
       name: true,
       parentId: true,
-      items: { select: { id: true, name: true, quantity: true } },
+      items: { select: { id: true, name: true, quantity: true, unit: true } },
       _count: { select: { children: true } },
     },
     orderBy: { name: "asc" },

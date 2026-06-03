@@ -8,6 +8,7 @@ import { MapPin, Pencil, Trash2 } from "lucide-react";
 import { Header } from "@/components/Navigation";
 import { EntityIcon } from "@/components/EntityIcon";
 import { DEFAULT_ITEM_ICON } from "@/lib/icons";
+import { formatItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
 import type { Item } from "@/types";
 
@@ -85,12 +86,12 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
         )}
 
         <div className="space-y-4">
-          {item.quantity > 1 && (
-            <div>
-              <p className="text-sm text-slate-500">Количество</p>
-              <p className="font-medium text-slate-900">×{item.quantity}</p>
-            </div>
-          )}
+          <div>
+            <p className="text-sm text-slate-500">Количество</p>
+            <p className="font-medium text-slate-900">
+              {formatItemQuantity(item.quantity, parseItemUnit(item.unit))}
+            </p>
+          </div>
 
           {item.description && (
             <div>

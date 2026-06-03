@@ -8,6 +8,8 @@ import { IconPicker } from "@/components/IconPicker";
 import { Input } from "@/components/ui/Input";
 import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
+import { QuantityField } from "@/components/QuantityField";
+import { DEFAULT_ITEM_UNIT, type ItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
 
 export default function NewItemPage({
@@ -20,6 +22,7 @@ export default function NewItemPage({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [unit, setUnit] = useState<ItemUnit>(DEFAULT_ITEM_UNIT);
   const [photo, setPhoto] = useState<File | null>(null);
   const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +49,7 @@ export default function NewItemPage({
       formData.append("name", name.trim());
       formData.append("locationId", resolvedId);
       formData.append("quantity", quantity);
+      formData.append("unit", unit);
       if (description.trim()) formData.append("description", description.trim());
       if (photo) formData.append("photo", photo);
       else if (iconName) formData.append("iconName", iconName);
@@ -77,12 +81,11 @@ export default function NewItemPage({
           autoFocus
         />
 
-        <Input
-          label="Количество"
-          type="number"
-          min="1"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+        <QuantityField
+          quantity={quantity}
+          unit={unit}
+          onQuantityChange={setQuantity}
+          onUnitChange={setUnit}
         />
 
         <Textarea

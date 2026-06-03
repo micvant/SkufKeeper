@@ -9,6 +9,7 @@ import {
   Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatItemQuantity, parseItemUnit, shouldShowItemQuantity } from "@/lib/item-units";
 import type { LocationTreeNode } from "@/types";
 
 interface LocationTreeProps {
@@ -124,8 +125,10 @@ function TreeLocationNode({
                   >
                     <Package className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                     <span className="truncate">{item.name}</span>
-                    {item.quantity > 1 && (
-                      <span className="shrink-0 text-xs text-slate-400">×{item.quantity}</span>
+                    {shouldShowItemQuantity(item.quantity, parseItemUnit(item.unit)) && (
+                      <span className="shrink-0 text-xs text-slate-400">
+                        {formatItemQuantity(item.quantity, parseItemUnit(item.unit))}
+                      </span>
                     )}
                   </Link>
                 </li>

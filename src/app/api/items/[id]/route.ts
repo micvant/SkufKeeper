@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
+import { parseItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { getRequestUserId } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
@@ -40,7 +41,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const name = (formData.get("name") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() || null;
     const locationId = formData.get("locationId") as string;
-    const quantity = parseInt(formData.get("quantity") as string) || 1;
+    const quantity = parseItemQuantity(formData.get("quantity"));
+    const unit = parseItemUnit(formData.get("unit") as string | null);
     const photo = formData.get("photo") as File | null;
     const removePhoto = formData.get("removePhoto") === "true";
     const iconNameInput = parseIconField(formData.get("iconName"));
@@ -75,7 +77,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     const item = await prisma.item.update({
       where: { id: existing.id },
-      data: { name, description, locationId, quantity, photoPath, iconName },
+      data: { name, description, locationId, quantity, unit, photoPath, iconName },
       include: { location: { select: { id: true, name: true } } },
     });
 

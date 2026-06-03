@@ -37,11 +37,6 @@ export default function QrCodesPage() {
       <Header title="Все QR-коды" backHref="/" />
 
       <div className="mx-auto max-w-lg px-4 py-6 md:max-w-2xl md:px-8">
-        <p className="mb-4 text-sm text-slate-600">
-          Здесь всегда можно найти и скачать QR-код любого места — даже после смены домена.
-          Коды содержат постоянный токен, не привязанный к URL сайта.
-        </p>
-
         <div className="relative mb-6">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
           <Input

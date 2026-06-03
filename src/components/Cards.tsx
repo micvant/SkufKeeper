@@ -3,6 +3,11 @@ import Link from "next/link";
 import { ChevronRight, Trash2 } from "lucide-react";
 import { EntityIcon } from "@/components/EntityIcon";
 import { DEFAULT_ITEM_ICON, DEFAULT_LOCATION_ICON } from "@/lib/icons";
+import {
+  formatItemQuantity,
+  parseItemUnit,
+  shouldShowItemQuantity,
+} from "@/lib/item-units";
 import type { StorageLocation } from "@/types";
 
 interface LocationCardProps {
@@ -108,6 +113,7 @@ interface ItemCardProps {
     photoPath?: string | null;
     iconName?: string | null;
     quantity?: number;
+    unit?: string | null;
     location?: { id: string; name: string };
   };
   showLocation?: boolean;
@@ -138,8 +144,11 @@ export function ItemCard({ item, showLocation = false, onDelete, deleting }: Ite
           <h3 className="truncate font-medium text-slate-900 group-hover:text-emerald-700">
             {item.name}
           </h3>
-          {item.quantity && item.quantity > 1 && (
-            <p className="text-xs text-slate-400">×{item.quantity}</p>
+          {item.quantity != null &&
+            shouldShowItemQuantity(item.quantity, parseItemUnit(item.unit)) && (
+            <p className="text-xs text-slate-400">
+              {formatItemQuantity(item.quantity, parseItemUnit(item.unit))}
+            </p>
           )}
           {showLocation && item.location && (
             <p className="mt-0.5 truncate text-xs text-emerald-600">{item.location.name}</p>

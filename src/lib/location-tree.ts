@@ -1,10 +1,11 @@
 import type { LocationTreeNode, StatsResponse } from "@/types";
+import { sumPieceQuantities } from "@/lib/item-units";
 
 type LocationRow = {
   id: string;
   name: string;
   parentId: string | null;
-  items: { id: string; name: string; quantity: number }[];
+  items: { id: string; name: string; quantity: number; unit: string }[];
   _count: { children: number };
 };
 
@@ -12,7 +13,7 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
   const nodes = new Map<string, LocationTreeNode>();
 
   for (const loc of locations) {
-    const directItemQuantity = loc.items.reduce((sum, item) => sum + item.quantity, 0);
+    const directItemQuantity = sumPieceQuantities(loc.items);
     const sortedItems = [...loc.items].sort((a, b) => a.name.localeCompare(b.name, "ru"));
     nodes.set(loc.id, {
       id: loc.id,
@@ -51,10 +52,7 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
   sortTree(roots);
 
   const totalItems = locations.reduce((sum, loc) => sum + loc.items.length, 0);
-  const totalItemQuantity = locations.reduce(
-    (sum, loc) => sum + loc.items.reduce((s, item) => s + item.quantity, 0),
-    0
-  );
+  const totalItemQuantity = sumPieceQuantities(locations.flatMap((loc) => loc.items));
 
   return {
     totalLocations: locations.length,

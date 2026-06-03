@@ -22,6 +22,7 @@ export interface Item {
   photoPath: string | null;
   iconName: string | null;
   quantity: number;
+  unit: string;
   locationId: string;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -32,6 +33,7 @@ export interface ItemTreeNode {
   id: string;
   name: string;
   quantity: number;
+  unit: string;
 }
 
 export interface LocationTreeNode {

@@ -8,6 +8,8 @@ import { IconPicker } from "@/components/IconPicker";
 import { Input } from "@/components/ui/Input";
 import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
+import { QuantityField } from "@/components/QuantityField";
+import { DEFAULT_ITEM_UNIT, parseItemUnit, type ItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
 import type { Item, StorageLocation } from "@/types";
 
@@ -17,6 +19,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [unit, setUnit] = useState<ItemUnit>(DEFAULT_ITEM_UNIT);
   const [locationId, setLocationId] = useState("");
   const [locations, setLocations] = useState<StorageLocation[]>([]);
   const [currentPhoto, setCurrentPhoto] = useState<string | null>(null);
@@ -38,6 +41,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
         setName(itemData.name);
         setDescription(itemData.description || "");
         setQuantity(String(itemData.quantity));
+        setUnit(parseItemUnit(itemData.unit));
         setLocationId(itemData.locationId);
         setCurrentPhoto(itemData.photoPath);
         setIconName(
@@ -63,6 +67,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
       formData.append("name", name.trim());
       formData.append("description", description.trim());
       formData.append("quantity", quantity);
+      formData.append("unit", unit);
       formData.append("locationId", locationId);
       if (photo) formData.append("photo", photo);
       if (removePhoto) formData.append("removePhoto", "true");
@@ -105,12 +110,11 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
           required
         />
 
-        <Input
-          label="Количество"
-          type="number"
-          min="1"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
+        <QuantityField
+          quantity={quantity}
+          unit={unit}
+          onQuantityChange={setQuantity}
+          onUnitChange={setUnit}
         />
 
         <div className="space-y-1.5">

@@ -79,12 +79,7 @@ export function LocationQRCode({
       }
     >
       {showLabel && (
-        <>
-          <p className="text-sm font-medium text-slate-900">QR-код места хранения</p>
-          <p className="mt-1 text-xs text-slate-500">
-            Код не привязан к домену — работает при смене адреса сайта
-          </p>
-        </>
+        <p className="text-sm font-medium text-slate-900">QR-код места хранения</p>
       )}
 
       <div className="relative mx-auto mt-4 h-44 w-44 overflow-hidden rounded-xl border border-white bg-white shadow-sm">

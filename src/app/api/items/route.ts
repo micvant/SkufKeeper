@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
+import { parseItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { getRequestUserId } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -38,7 +39,8 @@ export async function POST(request: NextRequest) {
     const name = (formData.get("name") as string)?.trim();
     const description = (formData.get("description") as string)?.trim() || null;
     const locationId = formData.get("locationId") as string;
-    const quantity = parseInt(formData.get("quantity") as string) || 1;
+    const quantity = parseItemQuantity(formData.get("quantity"));
+    const unit = parseItemUnit(formData.get("unit") as string | null);
     const photo = formData.get("photo") as File | null;
     const iconNameInput = parseIconField(formData.get("iconName"));
 
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     const item = await prisma.item.create({
-      data: { name, description, locationId, quantity, photoPath, iconName, userId },
+      data: { name, description, locationId, quantity, unit, photoPath, iconName, userId },
       include: { location: { select: { id: true, name: true } } },
     });
 

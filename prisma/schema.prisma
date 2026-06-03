@@ -45,7 +45,8 @@ model Item {
   description String?
   photoPath   String?
   iconName    String?
-  quantity    Int      @default(1)
+  quantity    Float    @default(1)
+  unit        String   @default("pcs")
   locationId  String
   location    StorageLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
