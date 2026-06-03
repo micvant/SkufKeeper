@@ -10,7 +10,9 @@ import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { QuantityField } from "@/components/QuantityField";
 import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, parseItemUnit, type ItemUnit } from "@/lib/item-units";
+import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { Button } from "@/components/ui/Button";
+import type { CustomFieldValueDto } from "@/lib/custom-field";
 import type { Item, StorageLocation } from "@/types";
 
 export default function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,6 +31,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const [customFields, setCustomFields] = useState<CustomFieldValueDto[]>([]);
 
   useEffect(() => {
     params.then(({ id: itemId }) => {
@@ -47,6 +50,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
         setIconName(
           itemData.iconName && isValidIconName(itemData.iconName) ? itemData.iconName : null
         );
+        setCustomFields(itemData.customFields ?? []);
         setLocations(locationsData);
       }).finally(() => setFetching(false));
     });
@@ -153,6 +157,12 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
         {showIconPicker && (
           <IconPicker value={iconName} onChange={setIconName} variant="item" />
         )}
+
+        <EntityCustomFields
+          entityType="item"
+          entityId={id}
+          initialFields={customFields}
+        />
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>

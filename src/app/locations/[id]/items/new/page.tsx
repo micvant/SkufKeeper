@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/Input";
 import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { QuantityField } from "@/components/QuantityField";
+import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, type ItemUnit } from "@/lib/item-units";
+import { persistCustomFieldDrafts, type DraftCustomField } from "@/lib/custom-field";
 import { Button } from "@/components/ui/Button";
 
 export default function NewItemPage({
@@ -27,6 +29,7 @@ export default function NewItemPage({
   const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [draftCustomFields, setDraftCustomFields] = useState<DraftCustomField[]>([]);
 
   useEffect(() => {
     params.then(({ id }) => setLocationId(id));
@@ -62,6 +65,10 @@ export default function NewItemPage({
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Ошибка");
+
+      if (draftCustomFields.length > 0) {
+        await persistCustomFieldDrafts("item", data.id, draftCustomFields);
+      }
 
       router.push(`/locations/${resolvedId}`);
     } catch (err) {
@@ -105,6 +112,12 @@ export default function NewItemPage({
         {!photo && (
           <IconPicker value={iconName} onChange={setIconName} variant="item" />
         )}
+
+        <EntityCustomFields
+          entityType="item"
+          draftFields={draftCustomFields}
+          onDraftChange={setDraftCustomFields}
+        />
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>

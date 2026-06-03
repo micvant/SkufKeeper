@@ -5,16 +5,67 @@ import { Plus, Trash2, Pencil, Check, X } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import type { CustomFieldDefinitionDto, CustomFieldEntityType, CustomFieldValueDto } from "@/lib/custom-field";
+import type {
+  CustomFieldDefinitionDto,
+  CustomFieldEntityType,
+  CustomFieldValueDto,
+  DraftCustomField,
+} from "@/lib/custom-field";
+
+type FieldRow = {
+  id: string;
+  definitionId: string;
+  label: string;
+  value: string;
+};
 
 interface EntityCustomFieldsProps {
   entityType: CustomFieldEntityType;
-  entityId: string;
+  entityId?: string;
   initialFields?: CustomFieldValueDto[];
+  draftFields?: DraftCustomField[];
+  onDraftChange?: (fields: DraftCustomField[]) => void;
 }
 
-export function EntityCustomFields({ entityType, entityId, initialFields = [] }: EntityCustomFieldsProps) {
-  const [values, setValues] = useState<CustomFieldValueDto[]>(initialFields);
+function toRowsFromSaved(fields: CustomFieldValueDto[]): FieldRow[] {
+  return fields.map((field) => ({
+    id: field.id,
+    definitionId: field.definitionId,
+    label: field.label,
+    value: field.value,
+  }));
+}
+
+function toRowsFromDraft(fields: DraftCustomField[]): FieldRow[] {
+  return fields.map((field) => ({
+    id: field.localId,
+    definitionId: field.definitionId,
+    label: field.label,
+    value: field.value,
+  }));
+}
+
+function toDraft(fields: FieldRow[]): DraftCustomField[] {
+  return fields.map((field) => ({
+    localId: field.id,
+    definitionId: field.definitionId,
+    label: field.label,
+    value: field.value,
+  }));
+}
+
+export function EntityCustomFields({
+  entityType,
+  entityId,
+  initialFields = [],
+  draftFields = [],
+  onDraftChange,
+}: EntityCustomFieldsProps) {
+  const isDraft = !entityId && !!onDraftChange;
+
+  const [values, setValues] = useState<FieldRow[]>(() =>
+    isDraft ? toRowsFromDraft(draftFields) : toRowsFromSaved(initialFields)
+  );
   const [definitions, setDefinitions] = useState<CustomFieldDefinitionDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -26,8 +77,12 @@ export function EntityCustomFields({ entityType, entityId, initialFields = [] }:
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setValues(initialFields);
-  }, [initialFields]);
+    if (isDraft) {
+      setValues(toRowsFromDraft(draftFields));
+    } else {
+      setValues(toRowsFromSaved(initialFields));
+    }
+  }, [initialFields, draftFields, isDraft]);
 
   useEffect(() => {
     fetch(`/api/custom-fields/definitions?entityType=${entityType}`)
@@ -36,12 +91,37 @@ export function EntityCustomFields({ entityType, entityId, initialFields = [] }:
       .finally(() => setLoading(false));
   }, [entityType]);
 
+  function updateDraft(next: FieldRow[]) {
+    setValues(next);
+    onDraftChange?.(toDraft(next));
+  }
+
   const usedDefinitionIds = new Set(values.map((v) => v.definitionId));
   const availableDefinitions = definitions.filter((d) => !usedDefinitionIds.has(d.id));
 
   async function handleAdd() {
     if (!selectedDefinitionId || !newValue.trim()) {
       setError("Выберите поле и введите значение");
+      return;
+    }
+
+    const definition = definitions.find((d) => d.id === selectedDefinitionId);
+    if (!definition) return;
+
+    if (isDraft) {
+      updateDraft([
+        ...values,
+        {
+          id: crypto.randomUUID(),
+          definitionId: definition.id,
+          label: definition.label,
+          value: newValue.trim(),
+        },
+      ]);
+      setAdding(false);
+      setSelectedDefinitionId("");
+      setNewValue("");
+      setError(null);
       return;
     }
 
@@ -77,6 +157,14 @@ export function EntityCustomFields({ entityType, entityId, initialFields = [] }:
       return;
     }
 
+    if (isDraft) {
+      updateDraft(values.map((v) => (v.id === id ? { ...v, value: editValue.trim() } : v)));
+      setEditingId(null);
+      setEditValue("");
+      setError(null);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
@@ -99,6 +187,12 @@ export function EntityCustomFields({ entityType, entityId, initialFields = [] }:
   }
 
   async function handleDelete(id: string) {
+    if (isDraft) {
+      updateDraft(values.filter((v) => v.id !== id));
+      setError(null);
+      return;
+    }
+
     setSaving(true);
     setError(null);
     try {
@@ -149,7 +243,9 @@ export function EntityCustomFields({ entityType, entityId, initialFields = [] }:
         </div>
       ) : values.length === 0 && !adding ? (
         <div className="px-4 py-4 text-sm text-slate-500">
-          Поля пока не добавлены. Нажмите «Добавить», чтобы заполнить нужные.
+          {isDraft
+            ? "При необходимости добавьте дополнительные поля."
+            : "Поля пока не добавлены. Нажмите «Добавить», чтобы заполнить нужные."}
         </div>
       ) : (
         <ul className="divide-y divide-slate-100">

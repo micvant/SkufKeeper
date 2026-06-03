@@ -7,7 +7,7 @@ import Image from "next/image";
 import { ChevronRight, MapPin, Pencil, Trash2 } from "lucide-react";
 import { Header } from "@/components/Navigation";
 import { EntityIcon } from "@/components/EntityIcon";
-import { EntityCustomFields } from "@/components/EntityCustomFields";
+import { CustomFieldsDisplay } from "@/components/CustomFieldsDisplay";
 import { DEFAULT_ITEM_ICON } from "@/lib/icons";
 import { formatItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
@@ -130,11 +130,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
           </section>
         )}
 
-        <EntityCustomFields
-          entityType="item"
-          entityId={id}
-          initialFields={item.customFields ?? []}
-        />
+        <CustomFieldsDisplay fields={item.customFields ?? []} />
 
         <div className="hidden gap-2 md:flex">
           <Link href={`/items/${id}/edit`} className="flex-1">

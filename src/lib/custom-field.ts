@@ -31,6 +31,35 @@ export interface CustomFieldValueDto {
   value: string;
 }
 
+export interface DraftCustomField {
+  localId: string;
+  definitionId: string;
+  label: string;
+  value: string;
+}
+
+export async function persistCustomFieldDrafts(
+  entityType: CustomFieldEntityType,
+  entityId: string,
+  drafts: DraftCustomField[]
+): Promise<void> {
+  for (const draft of drafts) {
+    const res = await fetch("/api/custom-fields/values", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        definitionId: draft.definitionId,
+        value: draft.value,
+        ...(entityType === "item" ? { itemId: entityId } : { locationId: entityId }),
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Не удалось сохранить дополнительное поле");
+    }
+  }
+}
+
 export function mapCustomFields(
   fields: Array<{
     id: string;

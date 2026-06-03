@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/Input";
 import { isValidLocationColor, type LocationColorSlug } from "@/lib/colors";
 import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
+import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { Button } from "@/components/ui/Button";
 import { LocationParentSelect } from "@/components/LocationParentSelect";
+import type { CustomFieldValueDto } from "@/lib/custom-field";
 import type { StorageLocation } from "@/types";
 
 export default function EditLocationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -27,6 +29,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [parentId, setParentId] = useState<string | null>(null);
+  const [customFields, setCustomFields] = useState<CustomFieldValueDto[]>([]);
 
   useEffect(() => {
     params.then(({ id: locationId }) => {
@@ -40,6 +43,7 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
           setIconName(data.iconName && isValidIconName(data.iconName) ? data.iconName : null);
           setColor(data.color && isValidLocationColor(data.color) ? data.color : null);
           setParentId(data.parentId);
+          setCustomFields(data.customFields ?? []);
         })
         .finally(() => setFetching(false));
     });
@@ -135,6 +139,12 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
             }}
           />
         )}
+
+        <EntityCustomFields
+          entityType="location"
+          entityId={id}
+          initialFields={customFields}
+        />
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>

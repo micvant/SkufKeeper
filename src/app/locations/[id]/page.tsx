@@ -26,7 +26,7 @@ import { EntityIcon } from "@/components/EntityIcon";
 import { getLocationColorStyles } from "@/lib/colors";
 import { DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
-import { EntityCustomFields } from "@/components/EntityCustomFields";
+import { CustomFieldsDisplay } from "@/components/CustomFieldsDisplay";
 import type { StorageLocation } from "@/types";
 
 type SectionKey = "qr" | "children" | "items" | "move";
@@ -214,11 +214,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
           </section>
         )}
 
-        <EntityCustomFields
-          entityType="location"
-          entityId={id}
-          initialFields={location.customFields ?? []}
-        />
+        <CustomFieldsDisplay fields={location.customFields ?? []} />
 
         <div className="flex items-center justify-between px-1">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Содержимое</p>

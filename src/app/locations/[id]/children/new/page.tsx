@@ -10,8 +10,10 @@ import { LocationQRCode } from "@/components/LocationQRCode";
 import { Input } from "@/components/ui/Input";
 import type { LocationColorSlug } from "@/lib/colors";
 import { type IconName } from "@/lib/icons";
+import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
+import { persistCustomFieldDrafts, type DraftCustomField } from "@/lib/custom-field";
 import type { StorageLocation } from "@/types";
 
 export default function NewChildLocationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,6 +28,7 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [created, setCreated] = useState<StorageLocation | null>(null);
+  const [draftCustomFields, setDraftCustomFields] = useState<DraftCustomField[]>([]);
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -62,6 +65,10 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
 
       if (!res.ok) throw new Error(data.error || "Ошибка");
       if (!data.qrToken) throw new Error("QR-код не был создан");
+
+      if (draftCustomFields.length > 0) {
+        await persistCustomFieldDrafts("location", data.id, draftCustomFields);
+      }
 
       setCreated(data);
     } catch (err) {
@@ -138,6 +145,12 @@ export default function NewChildLocationPage({ params }: { params: Promise<{ id:
             onColorChange={setColor}
           />
         )}
+
+        <EntityCustomFields
+          entityType="location"
+          draftFields={draftCustomFields}
+          onDraftChange={setDraftCustomFields}
+        />
 
         {error && (
           <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
