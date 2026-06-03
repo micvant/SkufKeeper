@@ -100,14 +100,14 @@ function TreeLocationNode({
                     <Package className="h-3 w-3 shrink-0" />
                     <span className="truncate">
                       {node.directItems} здесь
-                      {node.directItemQuantity !== node.directItems &&
-                        ` (×${node.directItemQuantity})`}
+                      {node.directQuantitySummary && ` — ${node.directQuantitySummary}`}
                     </span>
                   </span>
                 )}
                 {node.totalItems > node.directItems && (
                   <span className="truncate text-primary">
-                    {node.totalItems} всего с вложенными
+                    {node.totalItems} всего
+                    {node.totalQuantitySummary && ` — ${node.totalQuantitySummary}`}
                   </span>
                 )}
                 {node.childLocations > 0 && (

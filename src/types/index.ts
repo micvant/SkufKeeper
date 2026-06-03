@@ -11,6 +11,7 @@ export interface StorageLocation {
   updatedAt: string | Date;
   customFields?: CustomFieldValue[];
   _count?: { items: number; children?: number };
+  quantitySummary?: string | null;
   items?: Item[];
   children?: StorageLocation[];
   parent?: { id: string; name: string } | null;
@@ -51,9 +52,11 @@ export interface LocationTreeNode {
   parentId: string | null;
   directItems: number;
   directItemQuantity: number;
+  directQuantitySummary: string | null;
   childLocations: number;
   totalItems: number;
   totalItemQuantity: number;
+  totalQuantitySummary: string | null;
   items: ItemTreeNode[];
   children: LocationTreeNode[];
 }
@@ -62,6 +65,7 @@ export interface StatsResponse {
   totalLocations: number;
   totalItems: number;
   totalItemQuantity: number;
+  totalQuantitySummary: string | null;
   rootLocations: number;
   tree: LocationTreeNode[];
 }

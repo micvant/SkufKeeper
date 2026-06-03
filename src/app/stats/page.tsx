@@ -65,7 +65,11 @@ export default function StatsPage() {
                 <StatCard icon={MapPin} label="Мест хранения" value={stats.totalLocations} />
                 <StatCard icon={FolderTree} label="Корневых" value={stats.rootLocations} />
                 <StatCard icon={Package} label="Объектов" value={stats.totalItems} />
-                <StatCard icon={Package} label="Всего штук" value={stats.totalItemQuantity} />
+                <StatCard
+                  icon={Package}
+                  label="Количество"
+                  value={stats.totalQuantitySummary ?? "—"}
+                />
               </div>
             </CollapsibleSection>
 
@@ -115,12 +119,17 @@ function StatCard({
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  value: number;
+  value: number | string;
 }) {
+  const compact = typeof value === "string" && value.length > 14;
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4">
       <Icon className="h-5 w-5 text-primary" />
-      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+      <p
+        className={`mt-2 font-bold text-slate-900 ${compact ? "text-sm leading-snug" : "text-2xl"}`}
+      >
+        {value}
+      </p>
       <p className="text-xs text-slate-500">{label}</p>
     </div>
   );

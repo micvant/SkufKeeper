@@ -59,9 +59,42 @@ export function shouldShowItemQuantity(quantity: number, unit: ItemUnit = DEFAUL
   return quantity > 1;
 }
 
+export type UnitQuantityTotals = Partial<Record<ItemUnit, number>>;
+
+export function sumQuantitiesByUnit(
+  items: { quantity: number; unit?: string | null }[]
+): UnitQuantityTotals {
+  const totals: UnitQuantityTotals = {};
+  for (const item of items) {
+    const unit = parseItemUnit(item.unit);
+    totals[unit] = (totals[unit] ?? 0) + item.quantity;
+  }
+  return totals;
+}
+
+export function mergeQuantityTotals(...parts: UnitQuantityTotals[]): UnitQuantityTotals {
+  const merged: UnitQuantityTotals = {};
+  for (const totals of parts) {
+    for (const unitId of ITEM_UNIT_IDS) {
+      const value = totals[unitId];
+      if (value == null) continue;
+      merged[unitId] = (merged[unitId] ?? 0) + value;
+    }
+  }
+  return merged;
+}
+
+export function formatQuantityTotalsSummary(totals: UnitQuantityTotals): string | null {
+  const parts: string[] = [];
+  for (const unitId of ITEM_UNIT_IDS) {
+    const quantity = totals[unitId];
+    if (quantity != null && quantity > 0) {
+      parts.push(formatItemQuantity(quantity, unitId));
+    }
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 export function sumPieceQuantities(items: { quantity: number; unit?: string | null }[]): number {
-  return items.reduce(
-    (sum, item) => sum + (parseItemUnit(item.unit) === DEFAULT_ITEM_UNIT ? item.quantity : 0),
-    0
-  );
+  return sumQuantitiesByUnit(items).pcs ?? 0;
 }

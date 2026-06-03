@@ -5,6 +5,7 @@ import { BurgerMenu } from "@/components/Navigation";
 import { LocationCard } from "@/components/Cards";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/auth";
+import { formatQuantityTotalsSummary, sumQuantitiesByUnit } from "@/lib/item-units";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -15,14 +16,22 @@ export default async function HomePage() {
     redirect("/login");
   }
 
-  const [allLocations, totalItems] = await Promise.all([
+  const [allLocations, totalItems, allItemQuantities] = await Promise.all([
     prisma.storageLocation.findMany({
       where: { userId },
       include: { _count: { select: { items: true, children: true } } },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.item.count({ where: { userId } }),
+    prisma.item.findMany({
+      where: { userId },
+      select: { quantity: true, unit: true },
+    }),
   ]);
+
+  const globalQuantitySummary = formatQuantityTotalsSummary(
+    sumQuantitiesByUnit(allItemQuantities)
+  );
 
   const locationById = new Map(allLocations.map((loc) => [loc.id, loc]));
   const childrenByParent = new Map<string, string[]>();
@@ -71,7 +80,13 @@ export default async function HomePage() {
     });
 
   const totalLocations = allLocations.length;
-  const statsLine = `${totalLocations} ${totalLocations === 1 ? "место" : "мест"} · ${totalItems} объектов`;
+  const statsLine = [
+    `${totalLocations} ${totalLocations === 1 ? "место" : "мест"}`,
+    `${totalItems} объектов`,
+    globalQuantitySummary,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div>

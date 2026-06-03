@@ -1,5 +1,9 @@
 import type { LocationTreeNode, StatsResponse } from "@/types";
-import { sumPieceQuantities } from "@/lib/item-units";
+import {
+  formatQuantityTotalsSummary,
+  mergeQuantityTotals,
+  sumQuantitiesByUnit,
+} from "@/lib/item-units";
 
 type LocationRow = {
   id: string;
@@ -13,17 +17,19 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
   const nodes = new Map<string, LocationTreeNode>();
 
   for (const loc of locations) {
-    const directItemQuantity = sumPieceQuantities(loc.items);
+    const directTotals = sumQuantitiesByUnit(loc.items);
     const sortedItems = [...loc.items].sort((a, b) => a.name.localeCompare(b.name, "ru"));
     nodes.set(loc.id, {
       id: loc.id,
       name: loc.name,
       parentId: loc.parentId,
       directItems: loc.items.length,
-      directItemQuantity,
+      directItemQuantity: directTotals.pcs ?? 0,
+      directQuantitySummary: formatQuantityTotalsSummary(directTotals),
       childLocations: loc._count.children,
       totalItems: loc.items.length,
-      totalItemQuantity: directItemQuantity,
+      totalItemQuantity: directTotals.pcs ?? 0,
+      totalQuantitySummary: formatQuantityTotalsSummary(directTotals),
       items: sortedItems,
       children: [],
     });
@@ -39,25 +45,34 @@ export function buildLocationTree(locations: LocationRow[]): StatsResponse {
     }
   }
 
-  function aggregate(node: LocationTreeNode): void {
+  function aggregateNode(node: LocationTreeNode): ReturnType<typeof sumQuantitiesByUnit> {
+    let totals = sumQuantitiesByUnit(node.items);
+    let totalItems = node.items.length;
+
     for (const child of node.children) {
-      aggregate(child);
-      node.totalItems += child.totalItems;
-      node.totalItemQuantity += child.totalItemQuantity;
+      const childTotals = aggregateNode(child);
+      totalItems += child.totalItems;
+      totals = mergeQuantityTotals(totals, childTotals);
     }
+
+    node.totalItems = totalItems;
+    node.totalItemQuantity = totals.pcs ?? 0;
+    node.totalQuantitySummary = formatQuantityTotalsSummary(totals);
+    return totals;
   }
 
-  for (const root of roots) aggregate(root);
+  for (const root of roots) aggregateNode(root);
 
   sortTree(roots);
 
-  const totalItems = locations.reduce((sum, loc) => sum + loc.items.length, 0);
-  const totalItemQuantity = sumPieceQuantities(locations.flatMap((loc) => loc.items));
+  const allItems = locations.flatMap((loc) => loc.items);
+  const globalTotals = sumQuantitiesByUnit(allItems);
 
   return {
     totalLocations: locations.length,
-    totalItems,
-    totalItemQuantity,
+    totalItems: locations.reduce((sum, loc) => sum + loc.items.length, 0),
+    totalItemQuantity: globalTotals.pcs ?? 0,
+    totalQuantitySummary: formatQuantityTotalsSummary(globalTotals),
     rootLocations: roots.length,
     tree: roots,
   };
