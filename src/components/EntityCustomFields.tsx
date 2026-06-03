@@ -15,6 +15,7 @@ import type {
   CustomFieldValueDto,
   DraftCustomField,
 } from "@/lib/custom-field";
+import { safeRouterRefresh } from "@/lib/safe-router";
 
 type FieldRow = {
   id: string;
@@ -108,9 +109,9 @@ export function EntityCustomFields({
     setValues((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
       onFieldsChange?.(toSavedDto(next));
-      router.refresh();
       return next;
     });
+    safeRouterRefresh(router);
   }
 
   useEffect(() => {

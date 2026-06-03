@@ -19,6 +19,7 @@ import { isNetworkOnline } from "@/lib/offline-sync";
 import { queueCreateItem } from "@/lib/offline-item-helpers";
 import { getCachedJson, locationCacheKey } from "@/lib/offline-cache";
 import type { StorageLocation } from "@/types";
+import { safeRouterRefresh } from "@/lib/safe-router";
 
 export default function NewItemPage({
   params,
@@ -80,7 +81,6 @@ export default function NewItemPage({
         const loc = getCachedJson<StorageLocation>(locationCacheKey(resolvedId));
         queueCreateItem(payload, loc?.name);
         router.push(`/locations/${resolvedId}`);
-        router.refresh();
         return;
       }
 

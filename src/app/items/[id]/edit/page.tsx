@@ -16,6 +16,7 @@ import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { Button } from "@/components/ui/Button";
 import { isNetworkOnline } from "@/lib/offline-sync";
 import { enqueueOperation, isTempItemId } from "@/lib/offline-queue";
+import { safeRouterRefresh } from "@/lib/safe-router";
 import type { CustomFieldValueDto } from "@/lib/custom-field";
 import type { Item, StorageLocation } from "@/types";
 
@@ -108,7 +109,6 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
         }
         enqueueOperation({ type: "item.update", itemId: id, payload: jsonPayload });
         router.push(`/items/${id}`);
-        router.refresh();
         return;
       }
 
@@ -131,7 +131,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
 
       if (!res.ok) throw new Error(data.error || "Ошибка");
 
-      router.refresh();
+      safeRouterRefresh(router);
       router.push(`/items/${id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка");

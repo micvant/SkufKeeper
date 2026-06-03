@@ -29,6 +29,7 @@ import {
 } from "@/lib/item-stock";
 import { Button } from "@/components/ui/Button";
 import type { Item } from "@/types";
+import { safeRouterRefresh } from "@/lib/safe-router";
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
@@ -87,7 +88,7 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
           enqueueOperation({ type: "item.delete", itemId: item.id });
         }
         router.push(item.location ? `/locations/${item.location.id}` : "/");
-        router.refresh();
+        safeRouterRefresh(router);
         return;
       }
 

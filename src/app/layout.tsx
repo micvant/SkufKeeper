@@ -8,6 +8,8 @@ import { getCurrentUserId } from "@/lib/auth";
 import { DEFAULT_APP_THEME, parseAppTheme } from "@/lib/app-theme";
 import { DEFAULT_COLOR_SCHEME, parseColorScheme } from "@/lib/color-scheme";
 import { OfflineSyncProvider } from "@/components/OfflineSyncProvider";
+import { ThemeBootstrap } from "@/components/ThemeBootstrap";
+import { OfflineAwareLayout } from "@/components/OfflineAwareLayout";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -58,17 +60,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-color-scheme="light"
       suppressHydrationWarning
     >
+      <head>
+        <ThemeBootstrap />
+      </head>
       <body className="min-h-dvh overflow-x-hidden">
         <ThemeProvider initialTheme={initialTheme} initialColorScheme={initialColorScheme}>
           <OfflineSyncProvider>
-          <SwipeBackHandler />
-          <ServiceWorkerRegister />
-          <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
-            <Sidebar />
-            <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-              <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
-            </div>
-          </div>
+            <OfflineAwareLayout>
+              <SwipeBackHandler />
+              <ServiceWorkerRegister />
+              <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
+                <Sidebar />
+                <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+                  <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+                </div>
+              </div>
+            </OfflineAwareLayout>
           </OfflineSyncProvider>
         </ThemeProvider>
       </body>

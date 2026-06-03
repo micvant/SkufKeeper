@@ -20,6 +20,7 @@ import {
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { cacheLocationForOffline, cacheQrTokenForOffline } from "@/lib/offline-store";
 import { cacheJson, locationCacheKey } from "@/lib/offline-cache";
+import { safeRouterRefresh } from "@/lib/safe-router";
 import Image from "next/image";
 import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
@@ -89,7 +90,7 @@ export function LocationPageClient({
       }));
     }
     function onSyncComplete() {
-      router.refresh();
+      safeRouterRefresh(router);
     }
     window.addEventListener("skufkeeper-item-synced", onItemSynced);
     window.addEventListener("skufkeeper-sync-complete", onSyncComplete);

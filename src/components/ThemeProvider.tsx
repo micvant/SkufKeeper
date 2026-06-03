@@ -14,6 +14,8 @@ import {
   resolveColorScheme,
   type ColorSchemeId,
 } from "@/lib/color-scheme";
+import { safeGetItem, safeSetItem } from "@/lib/safe-storage";
+import { isNetworkOnline } from "@/lib/offline-sync";
 
 interface ThemeContextValue {
   theme: AppThemeId;
@@ -62,8 +64,22 @@ export function ThemeProvider({
     setReady(true);
   }, [initialTheme, initialColorScheme]);
 
+  function applyStoredPreferences() {
+    const storedTheme = parseAppTheme(safeGetItem(APP_THEME_STORAGE_KEY));
+    const storedScheme = parseColorScheme(safeGetItem(COLOR_SCHEME_STORAGE_KEY));
+    setThemeState(storedTheme);
+    setColorSchemeState(storedScheme);
+    applyTheme(storedTheme);
+    applyResolvedColorScheme(storedScheme);
+  }
+
   useEffect(() => {
     if (!ready) return;
+
+    if (!isNetworkOnline()) {
+      applyStoredPreferences();
+      return;
+    }
 
     fetch("/api/user/settings")
       .then(async (res) => {
@@ -75,25 +91,14 @@ export function ThemeProvider({
           setColorSchemeState(serverScheme);
           applyTheme(serverTheme);
           applyResolvedColorScheme(serverScheme);
-          localStorage.setItem(APP_THEME_STORAGE_KEY, serverTheme);
-          localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, serverScheme);
+          safeSetItem(APP_THEME_STORAGE_KEY, serverTheme);
+          safeSetItem(COLOR_SCHEME_STORAGE_KEY, serverScheme);
           return;
         }
-
-        const storedTheme = parseAppTheme(localStorage.getItem(APP_THEME_STORAGE_KEY));
-        const storedScheme = parseColorScheme(localStorage.getItem(COLOR_SCHEME_STORAGE_KEY));
-        setThemeState(storedTheme);
-        setColorSchemeState(storedScheme);
-        applyTheme(storedTheme);
-        applyResolvedColorScheme(storedScheme);
+        applyStoredPreferences();
       })
       .catch(() => {
-        const storedTheme = parseAppTheme(localStorage.getItem(APP_THEME_STORAGE_KEY));
-        const storedScheme = parseColorScheme(localStorage.getItem(COLOR_SCHEME_STORAGE_KEY));
-        setThemeState(storedTheme);
-        setColorSchemeState(storedScheme);
-        applyTheme(storedTheme);
-        applyResolvedColorScheme(storedScheme);
+        applyStoredPreferences();
       });
   }, [ready]);
 
@@ -128,13 +133,13 @@ export function ThemeProvider({
         const saved = parseAppTheme(data.appTheme);
         setThemeState(saved);
         applyTheme(saved);
-        localStorage.setItem(APP_THEME_STORAGE_KEY, saved);
+        safeSetItem(APP_THEME_STORAGE_KEY, saved);
       }
       if (data.appColorScheme) {
         const saved = parseColorScheme(data.appColorScheme);
         setColorSchemeState(saved);
         applyResolvedColorScheme(saved);
-        localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, saved);
+        safeSetItem(COLOR_SCHEME_STORAGE_KEY, saved);
       }
     } finally {
       setSaving(false);
@@ -144,14 +149,14 @@ export function ThemeProvider({
   async function setTheme(next: AppThemeId) {
     setThemeState(next);
     applyTheme(next);
-    localStorage.setItem(APP_THEME_STORAGE_KEY, next);
+    safeSetItem(APP_THEME_STORAGE_KEY, next);
     await patchSettings({ appTheme: next });
   }
 
   async function setColorScheme(next: ColorSchemeId) {
     setColorSchemeState(next);
     applyResolvedColorScheme(next);
-    localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, next);
+    safeSetItem(COLOR_SCHEME_STORAGE_KEY, next);
     await patchSettings({ appColorScheme: next });
   }
 

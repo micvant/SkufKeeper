@@ -1,3 +1,5 @@
+import { safeGetItem, safeSetItem } from "@/lib/safe-storage";
+
 const QUEUE_KEY = "skufkeeper-sync-queue-v1";
 
 export type QueuedOperation =
@@ -51,7 +53,7 @@ export type QueuedOperation =
 export function readQueue(): QueuedOperation[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(QUEUE_KEY);
+    const raw = safeGetItem(QUEUE_KEY);
     if (!raw) return [];
     return JSON.parse(raw) as QueuedOperation[];
   } catch {
@@ -60,7 +62,7 @@ export function readQueue(): QueuedOperation[] {
 }
 
 function writeQueue(queue: QueuedOperation[]) {
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  safeSetItem(QUEUE_KEY, JSON.stringify(queue));
 }
 
 export type QueuedOperationInput =

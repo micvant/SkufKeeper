@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import type { StorageLocation } from "@/types";
 import { isNetworkOnline } from "@/lib/offline-sync";
 import { enqueueOperation, isTempItemId } from "@/lib/offline-queue";
+import { safeRouterRefresh } from "@/lib/safe-router";
 
 interface ItemMoveDialogProps {
   itemId: string;
@@ -63,7 +64,7 @@ export function ItemMoveDialog({
           comment: comment || null,
         });
         onClose();
-        router.refresh();
+        safeRouterRefresh(router);
         return;
       }
 
@@ -76,7 +77,7 @@ export function ItemMoveDialog({
       if (!res.ok) throw new Error(data.error || "Ошибка");
       onClose();
       router.push(`/items/${itemId}`);
-      router.refresh();
+      safeRouterRefresh(router);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка");
     } finally {

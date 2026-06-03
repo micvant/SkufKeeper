@@ -1,3 +1,5 @@
+import { safeGetItem, safeSetItem } from "@/lib/safe-storage";
+
 const DB_KEY = "skufkeeper-offline-v1";
 
 export type OfflineLocationPayload = {
@@ -24,7 +26,7 @@ function readStore(): OfflineStore {
     return { locations: {}, qrByToken: {} };
   }
   try {
-    const raw = localStorage.getItem(DB_KEY);
+    const raw = safeGetItem(DB_KEY);
     if (!raw) return { locations: {}, qrByToken: {} };
     return JSON.parse(raw) as OfflineStore;
   } catch {
@@ -33,7 +35,7 @@ function readStore(): OfflineStore {
 }
 
 function writeStore(store: OfflineStore) {
-  localStorage.setItem(DB_KEY, JSON.stringify(store));
+  safeSetItem(DB_KEY, JSON.stringify(store));
 }
 
 export function cacheLocationForOffline(payload: OfflineLocationPayload) {
