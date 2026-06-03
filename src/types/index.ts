@@ -6,14 +6,21 @@ export interface StorageLocation {
   photoPath: string | null;
   iconName: string | null;
   color: string | null;
-  customFieldValue: string | null;
   parentId: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
+  customFields?: CustomFieldValue[];
   _count?: { items: number; children?: number };
   items?: Item[];
   children?: StorageLocation[];
   parent?: { id: string; name: string } | null;
+}
+
+export interface CustomFieldValue {
+  id: string;
+  definitionId: string;
+  label: string;
+  value: string;
 }
 
 export interface Item {
@@ -24,10 +31,10 @@ export interface Item {
   iconName: string | null;
   quantity: number;
   unit: string;
-  customFieldValue: string | null;
   locationId: string;
   createdAt: string | Date;
   updatedAt: string | Date;
+  customFields?: CustomFieldValue[];
   location?: { id: string; name: string };
 }
 

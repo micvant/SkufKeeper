@@ -7,10 +7,10 @@ import Image from "next/image";
 import { ChevronRight, MapPin, Pencil, Trash2 } from "lucide-react";
 import { Header } from "@/components/Navigation";
 import { EntityIcon } from "@/components/EntityIcon";
+import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { DEFAULT_ITEM_ICON } from "@/lib/icons";
 import { formatItemQuantity, parseItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
-import { useUserSettings } from "@/hooks/useUserSettings";
 import type { Item } from "@/types";
 
 function DetailRow({ label, value }: { label: string; value: string }) {
@@ -28,7 +28,6 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
-  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id: itemId }) => {
@@ -72,9 +71,6 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
   }
 
   const quantityLabel = formatItemQuantity(item.quantity, parseItemUnit(item.unit));
-  const hasDetails =
-    Boolean(item.description) ||
-    Boolean(item.customFieldValue && settings?.itemCustomFieldLabel);
 
   return (
     <div className="pb-28 md:pb-6">
@@ -128,14 +124,17 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
           </div>
         </article>
 
-        {hasDetails && (
+        {item.description && (
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
-            {item.description && <DetailRow label="Описание" value={item.description} />}
-            {item.customFieldValue && settings?.itemCustomFieldLabel && (
-              <DetailRow label={settings.itemCustomFieldLabel} value={item.customFieldValue} />
-            )}
+            <DetailRow label="Описание" value={item.description} />
           </section>
         )}
+
+        <EntityCustomFields
+          entityType="item"
+          entityId={id}
+          initialFields={item.customFields ?? []}
+        />
 
         <div className="hidden gap-2 md:flex">
           <Link href={`/items/${id}/edit`} className="flex-1">

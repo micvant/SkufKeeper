@@ -11,8 +11,6 @@ import { isValidIconName, type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { LocationParentSelect } from "@/components/LocationParentSelect";
-import { CustomFieldInput } from "@/components/CustomFieldInput";
-import { useUserSettings } from "@/hooks/useUserSettings";
 import type { StorageLocation } from "@/types";
 
 export default function EditLocationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,8 +27,6 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [parentId, setParentId] = useState<string | null>(null);
-  const [customFieldValue, setCustomFieldValue] = useState("");
-  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id: locationId }) => {
@@ -44,7 +40,6 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
           setIconName(data.iconName && isValidIconName(data.iconName) ? data.iconName : null);
           setColor(data.color && isValidLocationColor(data.color) ? data.color : null);
           setParentId(data.parentId);
-          setCustomFieldValue(data.customFieldValue ?? "");
         })
         .finally(() => setFetching(false));
     });
@@ -64,7 +59,6 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
       const formData = new FormData();
       formData.append("name", name.trim());
       formData.append("description", description.trim());
-      formData.append("customFieldValue", customFieldValue.trim());
       if (photo) formData.append("photo", photo);
       if (removePhoto) formData.append("removePhoto", "true");
       if (!photo && (!currentPhoto || removePhoto)) {
@@ -112,12 +106,6 @@ export default function EditLocationPage({ params }: { params: Promise<{ id: str
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <CustomFieldInput
-          label={settings?.locationCustomFieldLabel}
-          value={customFieldValue}
-          onChange={setCustomFieldValue}
         />
 
         <PhotoUpload

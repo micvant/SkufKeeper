@@ -96,7 +96,7 @@ export function LocationParentSelect({
   const changed = (parentId || null) !== (currentParentId || null);
 
   return (
-    <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div className="space-y-2">
       <p className="text-sm font-medium text-slate-700">Переместить в другое место</p>
       <select
         value={parentId}

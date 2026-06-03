@@ -3,22 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { getRequestUserId } from "@/lib/auth";
 import { isValidAppTheme, parseAppTheme } from "@/lib/app-theme";
 
-function parseCustomFieldLabel(value: unknown): string | null {
-  if (value === null || value === undefined) return null;
-  const trimmed = String(value).trim();
-  if (!trimmed) return null;
-  return trimmed.slice(0, 64);
-}
-
-function serializeUserSettings(user: {
-  appTheme: string;
-  itemCustomFieldLabel: string | null;
-  locationCustomFieldLabel: string | null;
-}) {
+function serializeUserSettings(user: { appTheme: string }) {
   return {
     appTheme: parseAppTheme(user.appTheme),
-    itemCustomFieldLabel: user.itemCustomFieldLabel,
-    locationCustomFieldLabel: user.locationCustomFieldLabel,
   };
 }
 
@@ -30,11 +17,7 @@ export async function GET(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: {
-      appTheme: true,
-      itemCustomFieldLabel: true,
-      locationCustomFieldLabel: true,
-    },
+    select: { appTheme: true },
   });
 
   if (!user) {
@@ -51,45 +34,16 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json()) as {
-      appTheme?: string;
-      itemCustomFieldLabel?: string | null;
-      locationCustomFieldLabel?: string | null;
-    };
+    const body = (await request.json()) as { appTheme?: string };
 
-    const data: {
-      appTheme?: string;
-      itemCustomFieldLabel?: string | null;
-      locationCustomFieldLabel?: string | null;
-    } = {};
-
-    if (body.appTheme !== undefined) {
-      if (!isValidAppTheme(body.appTheme)) {
-        return NextResponse.json({ error: "Некорректная тема" }, { status: 400 });
-      }
-      data.appTheme = body.appTheme;
-    }
-
-    if (body.itemCustomFieldLabel !== undefined) {
-      data.itemCustomFieldLabel = parseCustomFieldLabel(body.itemCustomFieldLabel);
-    }
-
-    if (body.locationCustomFieldLabel !== undefined) {
-      data.locationCustomFieldLabel = parseCustomFieldLabel(body.locationCustomFieldLabel);
-    }
-
-    if (Object.keys(data).length === 0) {
-      return NextResponse.json({ error: "Нет данных для обновления" }, { status: 400 });
+    if (!body.appTheme || !isValidAppTheme(body.appTheme)) {
+      return NextResponse.json({ error: "Некорректная тема" }, { status: 400 });
     }
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data,
-      select: {
-        appTheme: true,
-        itemCustomFieldLabel: true,
-        locationCustomFieldLabel: true,
-      },
+      data: { appTheme: body.appTheme },
+      select: { appTheme: true },
     });
 
     return NextResponse.json(serializeUserSettings(user));

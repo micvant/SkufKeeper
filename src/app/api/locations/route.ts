@@ -4,7 +4,6 @@ import { generateUniqueQrToken } from "@/lib/qr-token";
 import { saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseColorField } from "@/lib/color-field";
-import { parseCustomFieldValue } from "@/lib/custom-field";
 import { getRequestUserId } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -56,8 +55,6 @@ export async function POST(request: NextRequest) {
     const iconNameInput = parseIconField(formData.get("iconName"));
     const colorInput = parseColorField(formData.get("color"));
 
-    const customFieldValue = parseCustomFieldValue(formData.get("customFieldValue"));
-
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
     }
@@ -85,7 +82,6 @@ export async function POST(request: NextRequest) {
         photoPath,
         iconName,
         color: colorInput,
-        customFieldValue,
         qrToken,
         parentId,
         userId,

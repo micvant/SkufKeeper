@@ -9,10 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { type IconName } from "@/lib/icons";
 import { Textarea } from "@/components/ui/Textarea";
 import { QuantityField } from "@/components/QuantityField";
-import { DEFAULT_ITEM_UNIT, type ItemUnit } from "@/lib/item-units";
+import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, type ItemUnit } from "@/lib/item-units";
 import { Button } from "@/components/ui/Button";
-import { CustomFieldInput } from "@/components/CustomFieldInput";
-import { useUserSettings } from "@/hooks/useUserSettings";
 
 export default function NewItemPage({
   params,
@@ -29,8 +27,6 @@ export default function NewItemPage({
   const [iconName, setIconName] = useState<IconName | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [customFieldValue, setCustomFieldValue] = useState("");
-  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id }) => setLocationId(id));
@@ -40,6 +36,10 @@ export default function NewItemPage({
     e.preventDefault();
     if (!name.trim()) {
       setError("Введите название");
+      return;
+    }
+    if (parseItemQuantityStrict(quantity) === null) {
+      setError("Укажите корректное количество");
       return;
     }
 
@@ -55,7 +55,6 @@ export default function NewItemPage({
       formData.append("quantity", quantity);
       formData.append("unit", unit);
       if (description.trim()) formData.append("description", description.trim());
-      if (customFieldValue.trim()) formData.append("customFieldValue", customFieldValue.trim());
       if (photo) formData.append("photo", photo);
       else if (iconName) formData.append("iconName", iconName);
 
@@ -99,12 +98,6 @@ export default function NewItemPage({
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <CustomFieldInput
-          label={settings?.itemCustomFieldLabel}
-          value={customFieldValue}
-          onChange={setCustomFieldValue}
         />
 
         <PhotoUpload onPhotoChange={setPhoto} label="Фото объекта" />

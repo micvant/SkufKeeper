@@ -4,7 +4,7 @@ import { collectDescendantIds } from "@/lib/location-tree";
 import { deleteUploadedFile, saveUploadedFile } from "@/lib/upload";
 import { parseIconField } from "@/lib/icon-field";
 import { parseColorField } from "@/lib/color-field";
-import { parseCustomFieldValue } from "@/lib/custom-field";
+import { customFieldsInclude, serializeEntityWithCustomFields } from "@/lib/custom-field";
 import { getRequestUserId } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
@@ -25,6 +25,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
         orderBy: { name: "asc" },
       },
       parent: { select: { id: true, name: true } },
+      ...customFieldsInclude,
     },
   });
 
@@ -32,7 +33,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Место не найдено" }, { status: 404 });
   }
 
-  return NextResponse.json(location);
+  return NextResponse.json(serializeEntityWithCustomFields(location));
 }
 
 export async function PUT(request: NextRequest, { params }: Params) {
@@ -54,7 +55,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
     const removePhoto = formData.get("removePhoto") === "true";
     const iconNameInput = parseIconField(formData.get("iconName"));
     const colorInput = parseColorField(formData.get("color"));
-    const customFieldValue = parseCustomFieldValue(formData.get("customFieldValue"));
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
@@ -80,14 +80,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     const location = await prisma.storageLocation.update({
       where: { id: existing.id },
-      data: { name, description, photoPath, iconName, color, customFieldValue },
+      data: { name, description, photoPath, iconName, color },
       include: {
         _count: { select: { items: true, children: true } },
         parent: { select: { id: true, name: true } },
+        ...customFieldsInclude,
       },
     });
 
-    return NextResponse.json(location);
+    return NextResponse.json(serializeEntityWithCustomFields(location));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Ошибка обновления";
     return NextResponse.json({ error: message }, { status: 500 });

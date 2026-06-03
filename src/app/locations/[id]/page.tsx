@@ -3,7 +3,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, FolderOpen, QrCode, Package, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  FolderOpen,
+  QrCode,
+  Package,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  MapPin,
+  ChevronRight,
+  ArrowRightLeft,
+} from "lucide-react";
 import Image from "next/image";
 import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
@@ -14,10 +26,19 @@ import { EntityIcon } from "@/components/EntityIcon";
 import { getLocationColorStyles } from "@/lib/colors";
 import { DEFAULT_LOCATION_ICON } from "@/lib/icons";
 import { Button } from "@/components/ui/Button";
-import { useUserSettings } from "@/hooks/useUserSettings";
+import { EntityCustomFields } from "@/components/EntityCustomFields";
 import type { StorageLocation } from "@/types";
 
-type SectionKey = "qr" | "children" | "items";
+type SectionKey = "qr" | "children" | "items" | "move";
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-4 py-3.5">
+      <p className="text-xs font-medium text-slate-400">{label}</p>
+      <p className="mt-1 text-sm leading-relaxed text-slate-800">{value}</p>
+    </div>
+  );
+}
 
 export default function LocationPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -28,10 +49,10 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [sections, setSections] = useState<Record<SectionKey, boolean>>({
     qr: false,
-    children: false,
-    items: false,
+    children: true,
+    items: true,
+    move: false,
   });
-  const { settings } = useUserSettings();
 
   useEffect(() => {
     params.then(({ id: locationId }) => {
@@ -52,11 +73,11 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
   }
 
   function expandAllSections() {
-    setSections({ qr: true, children: true, items: true });
+    setSections({ qr: true, children: true, items: true, move: true });
   }
 
   function collapseAllSections() {
-    setSections({ qr: false, children: false, items: false });
+    setSections({ qr: false, children: false, items: false, move: false });
   }
 
   async function handleDeleteItem(itemId: string, itemName: string) {
@@ -115,92 +136,110 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
   }
 
   const backHref = location.parent ? `/locations/${location.parent.id}` : "/";
+  const childrenCount = location.children?.length ?? 0;
+  const itemsCount = location.items?.length ?? 0;
 
   return (
-    <div>
+    <div className="pb-28 md:pb-6">
       <Header title={location.name} backHref={backHref} />
 
-      <div className="mx-auto max-w-3xl px-4 py-6 md:max-w-none md:px-8">
-        {location.parent && (
-          <Link
-            href={`/locations/${location.parent.id}`}
-            className="mb-4 inline-flex items-center gap-1 text-sm text-primary hover:opacity-80"
-          >
-            ← {location.parent.name}
-          </Link>
-        )}
+      <div className="mx-auto max-w-lg space-y-3 px-4 py-4 md:max-w-2xl md:px-8 md:py-6">
+        <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {location.photoPath ? (
+            <div className="relative aspect-[16/10] max-h-48 w-full bg-slate-100">
+              <Image
+                src={location.photoPath}
+                alt={location.name}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+          ) : (
+            <div
+              className={`flex items-center gap-4 p-4 ${getLocationColorStyles(location.color).bg}`}
+            >
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-white/70">
+                <EntityIcon
+                  iconName={location.iconName}
+                  fallback={DEFAULT_LOCATION_ICON}
+                  colorSlug={location.color}
+                  iconClassName="h-8 w-8"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-slate-700">
+                    <FolderOpen className="h-3.5 w-3.5 text-primary" />
+                    {childrenCount} {childrenCount === 1 ? "место" : "мест"}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-slate-700">
+                    <Package className="h-3.5 w-3.5 text-primary" />
+                    {itemsCount} {itemsCount === 1 ? "объект" : "объектов"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
-        {location.photoPath ? (
-          <div className="relative mb-6 aspect-[16/10] max-w-2xl overflow-hidden rounded-2xl bg-slate-100">
-            <Image
-              src={location.photoPath}
-              alt={location.name}
-              fill
-              className="object-cover"
-              unoptimized
-            />
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 py-3">
+            {location.photoPath && (
+              <>
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                  <FolderOpen className="h-3.5 w-3.5" />
+                  {childrenCount} {childrenCount === 1 ? "место" : "мест"}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                  <Package className="h-3.5 w-3.5" />
+                  {itemsCount} {itemsCount === 1 ? "объект" : "объектов"}
+                </span>
+              </>
+            )}
+            {location.parent && (
+              <Link
+                href={`/locations/${location.parent.id}`}
+                className="inline-flex min-w-0 flex-1 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-primary-light hover:text-primary sm:flex-none"
+              >
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                <span className="truncate">{location.parent.name}</span>
+                <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-slate-400 sm:ml-0" />
+              </Link>
+            )}
           </div>
-        ) : (
-          <div
-            className={`mb-6 flex aspect-[16/10] max-w-2xl items-center justify-center rounded-2xl ${getLocationColorStyles(location.color).bg}`}
-          >
-            <EntityIcon
-              iconName={location.iconName}
-              fallback={DEFAULT_LOCATION_ICON}
-              colorSlug={location.color}
-              iconClassName="h-16 w-16"
-            />
-          </div>
-        )}
+        </article>
 
         {location.description && (
-          <p className="mb-6 text-slate-600">{location.description}</p>
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-100">
+            <DetailRow label="Описание" value={location.description} />
+          </section>
         )}
 
-        {location.customFieldValue && settings?.locationCustomFieldLabel && (
-          <div className="mb-6">
-            <p className="text-sm text-slate-500">{settings.locationCustomFieldLabel}</p>
-            <p className="text-slate-700">{location.customFieldValue}</p>
-          </div>
-        )}
+        <EntityCustomFields
+          entityType="location"
+          entityId={id}
+          initialFields={location.customFields ?? []}
+        />
 
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Link href={`/locations/${id}/edit`}>
-            <Button variant="secondary" size="sm">
-              <Pencil className="h-4 w-4" />
-              Редактировать
-            </Button>
-          </Link>
-          <Button variant="danger" size="sm" onClick={handleDelete} disabled={deleting}>
-            <Trash2 className="h-4 w-4" />
-            {deleting ? "Удаление..." : "Удалить"}
-          </Button>
-          <div className="ml-auto flex gap-2">
-            <Button variant="ghost" size="sm" type="button" onClick={expandAllSections}>
-              <ChevronsUpDown className="h-4 w-4" />
+        <div className="flex items-center justify-between px-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Содержимое</p>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={expandAllSections}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
+            >
+              <ChevronsUpDown className="h-3.5 w-3.5" />
               Развернуть
-            </Button>
-            <Button variant="ghost" size="sm" type="button" onClick={collapseAllSections}>
-              <ChevronsDownUp className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={collapseAllSections}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
+            >
+              <ChevronsDownUp className="h-3.5 w-3.5" />
               Свернуть
-            </Button>
+            </button>
           </div>
-        </div>
-
-        <div className="mb-6">
-          <LocationParentSelect
-            locationId={id}
-            currentParentId={location.parentId}
-            onMoved={() => {
-              fetch(`/api/locations/${id}`)
-                .then(async (res) => {
-                  const data = await res.json();
-                  if (!res.ok) return null;
-                  return data as StorageLocation;
-                })
-                .then((data) => data && setLocation(data));
-            }}
-          />
         </div>
 
         <div className="space-y-3">
@@ -211,7 +250,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
                 Вложенные места
               </span>
             }
-            count={location.children?.length ?? 0}
+            count={childrenCount}
             open={sections.children}
             onOpenChange={(open) => setSection("children", open)}
             actions={
@@ -223,9 +262,9 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               </Link>
             }
           >
-            {location.children && location.children.length > 0 ? (
+            {childrenCount > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                {location.children.map((child) => (
+                {location.children!.map((child) => (
                   <LocationCard key={child.id} location={child} compact />
                 ))}
               </div>
@@ -252,7 +291,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
                 Объекты
               </span>
             }
-            count={location.items?.length ?? 0}
+            count={itemsCount}
             open={sections.items}
             onOpenChange={(open) => setSection("items", open)}
             actions={
@@ -264,7 +303,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               </Link>
             }
           >
-            {!location.items?.length ? (
+            {itemsCount === 0 ? (
               <div className="rounded-xl border-2 border-dashed border-slate-200 p-8 text-center">
                 <p className="text-sm text-slate-500">Здесь пока ничего нет</p>
                 <Link href={`/locations/${id}/items/new`} className="mt-4 inline-block">
@@ -276,7 +315,7 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               </div>
             ) : (
               <div className="space-y-3">
-                {location.items.map((item) => (
+                {location.items!.map((item) => (
                   <ItemCard
                     key={item.id}
                     item={item}
@@ -307,6 +346,71 @@ export default function LocationPage({ params }: { params: Promise<{ id: string 
               />
             </CollapsibleSection>
           )}
+
+          <CollapsibleSection
+            title={
+              <span className="inline-flex items-center gap-2">
+                <ArrowRightLeft className="h-4 w-4 text-primary" />
+                Перемещение
+              </span>
+            }
+            open={sections.move}
+            onOpenChange={(open) => setSection("move", open)}
+          >
+            <LocationParentSelect
+              locationId={id}
+              currentParentId={location.parentId}
+              onMoved={() => {
+                fetch(`/api/locations/${id}`)
+                  .then(async (res) => {
+                    const data = await res.json();
+                    if (!res.ok) return null;
+                    return data as StorageLocation;
+                  })
+                  .then((data) => data && setLocation(data));
+              }}
+            />
+          </CollapsibleSection>
+        </div>
+
+        <div className="hidden gap-2 md:flex">
+          <Link href={`/locations/${id}/edit`} className="flex-1">
+            <Button variant="secondary" size="lg" className="w-full">
+              <Pencil className="h-4 w-4" />
+              Редактировать
+            </Button>
+          </Link>
+          <Button
+            variant="danger"
+            size="lg"
+            className="flex-1"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            <Trash2 className="h-4 w-4" />
+            {deleting ? "Удаление..." : "Удалить"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-lg safe-bottom md:hidden">
+        <div className="mx-auto flex max-w-lg gap-2">
+          <Link href={`/locations/${id}/edit`} className="flex-1">
+            <Button variant="secondary" size="lg" className="w-full">
+              <Pencil className="h-4 w-4" />
+              Изменить
+            </Button>
+          </Link>
+          <Button
+            variant="danger"
+            size="lg"
+            className="flex-1"
+            onClick={handleDelete}
+            disabled={deleting}
+          >
+            <Trash2 className="h-4 w-4" />
+            {deleting ? "..." : "Удалить"}
+          </Button>
         </div>
       </div>
     </div>
