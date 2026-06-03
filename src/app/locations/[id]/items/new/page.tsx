@@ -15,6 +15,10 @@ import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, type ItemUnit } from "@/lib/item-units";
 import { persistCustomFieldDrafts, type DraftCustomField } from "@/lib/custom-field";
 import { Button } from "@/components/ui/Button";
+import { isNetworkOnline } from "@/lib/offline-sync";
+import { queueCreateItem } from "@/lib/offline-item-helpers";
+import { getCachedJson, locationCacheKey } from "@/lib/offline-cache";
+import type { StorageLocation } from "@/types";
 
 export default function NewItemPage({
   params,
@@ -56,24 +60,57 @@ export default function NewItemPage({
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append("name", name.trim());
-      formData.append("locationId", resolvedId);
-      formData.append("quantity", quantity);
-      formData.append("unit", unit);
-      if (description.trim()) formData.append("description", description.trim());
-      if (minQuantity.trim()) formData.append("minQuantity", minQuantity.trim());
-      if (expiresAt) formData.append("expiresAt", expiresAt);
-      if (photo) formData.append("photo", photo);
-      else if (iconName) formData.append("iconName", iconName);
+      if (photo && !isNetworkOnline()) {
+        setError("Загрузка фото доступна только при подключении к интернету");
+        return;
+      }
 
-      const res = await fetch("/api/items", { method: "POST", body: formData });
-      const data = await res.json();
+      const payload = {
+        name: name.trim(),
+        description: description.trim() || null,
+        locationId: resolvedId,
+        quantity: parseFloat(quantity.replace(",", ".")) || 1,
+        unit,
+        minQuantity: minQuantity.trim() ? parseFloat(minQuantity.replace(",", ".")) : null,
+        expiresAt: expiresAt || null,
+        iconName: !photo ? iconName : null,
+      };
 
-      if (!res.ok) throw new Error(data.error || "Ошибка");
+      if (!isNetworkOnline()) {
+        const loc = getCachedJson<StorageLocation>(locationCacheKey(resolvedId));
+        queueCreateItem(payload, loc?.name);
+        router.push(`/locations/${resolvedId}`);
+        router.refresh();
+        return;
+      }
 
-      if (draftCustomFields.length > 0) {
-        await persistCustomFieldDrafts("item", data.id, draftCustomFields);
+      if (photo || draftCustomFields.length > 0) {
+        const formData = new FormData();
+        formData.append("name", payload.name);
+        formData.append("locationId", resolvedId);
+        formData.append("quantity", quantity);
+        formData.append("unit", unit);
+        if (payload.description) formData.append("description", payload.description);
+        if (minQuantity.trim()) formData.append("minQuantity", minQuantity.trim());
+        if (expiresAt) formData.append("expiresAt", expiresAt);
+        if (photo) formData.append("photo", photo);
+        else if (iconName) formData.append("iconName", iconName);
+
+        const res = await fetch("/api/items", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Ошибка");
+
+        if (draftCustomFields.length > 0) {
+          await persistCustomFieldDrafts("item", data.id, draftCustomFields);
+        }
+      } else {
+        const res = await fetch("/api/items", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Ошибка");
       }
 
       router.push(`/locations/${resolvedId}`);

@@ -43,17 +43,46 @@ export async function PUT(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Объект не найден" }, { status: 404 });
     }
 
-    const formData = await request.formData();
-    const name = (formData.get("name") as string)?.trim();
-    const description = (formData.get("description") as string)?.trim() || null;
-    const locationId = formData.get("locationId") as string;
-    const quantity = parseItemQuantity(formData.get("quantity"));
-    const unit = parseItemUnit(formData.get("unit") as string | null);
-    const minQuantity = parseMinQuantity(formData.get("minQuantity"));
-    const expiresAt = parseExpiresAt(formData.get("expiresAt"));
-    const photo = formData.get("photo") as File | null;
-    const removePhoto = formData.get("removePhoto") === "true";
-    const iconNameInput = parseIconField(formData.get("iconName"));
+    const contentType = request.headers.get("content-type") ?? "";
+    const isJson = contentType.includes("application/json");
+
+    let name: string;
+    let description: string | null;
+    let locationId: string;
+    let quantity: number;
+    let unit: ReturnType<typeof parseItemUnit>;
+    let minQuantity: number | null;
+    let expiresAt: Date | null;
+    let photo: File | null = null;
+    let removePhoto = false;
+    let iconNameInput: string | null = null;
+    let iconFieldProvided = isJson;
+
+    if (isJson) {
+      const { parseItemJsonBody } = await import("@/lib/item-api-body");
+      const parsed = parseItemJsonBody(await request.json());
+      name = parsed.name;
+      description = parsed.description;
+      locationId = parsed.locationId;
+      quantity = parsed.quantity;
+      unit = parsed.unit;
+      minQuantity = parsed.minQuantity;
+      expiresAt = parsed.expiresAt;
+      iconNameInput = parsed.iconName;
+    } else {
+      const formData = await request.formData();
+      name = (formData.get("name") as string)?.trim();
+      description = (formData.get("description") as string)?.trim() || null;
+      locationId = formData.get("locationId") as string;
+      quantity = parseItemQuantity(formData.get("quantity"));
+      unit = parseItemUnit(formData.get("unit") as string | null);
+      minQuantity = parseMinQuantity(formData.get("minQuantity"));
+      expiresAt = parseExpiresAt(formData.get("expiresAt"));
+      photo = formData.get("photo") as File | null;
+      removePhoto = formData.get("removePhoto") === "true";
+      iconFieldProvided = formData.has("iconName");
+      iconNameInput = parseIconField(formData.get("iconName"));
+    }
 
     if (!name) {
       return NextResponse.json({ error: "Название обязательно" }, { status: 400 });
@@ -71,7 +100,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       if (photoPath) await deleteUploadedFile(photoPath);
       photoPath = await saveUploadedFile(photo);
       iconName = null;
-    } else if (!photoPath && formData.has("iconName")) {
+    } else if (!photoPath && iconFieldProvided) {
       iconName = iconNameInput;
     }
 

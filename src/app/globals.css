@@ -13,7 +13,16 @@ body {
   width: 100%;
 }
 
-:root,
+:root {
+  --sk-bg: 248 250 252;
+  --sk-surface: 255 255 255;
+  --sk-surface-muted: 241 245 249;
+  --sk-border: 226 232 240;
+  --sk-text: 15 23 42;
+  --sk-text-muted: 100 116 139;
+  --sk-header-bg: 255 255 255;
+}
+
 [data-app-theme="emerald"] {
   --sk-primary: 5 150 105;
   --sk-primary-hover: 4 120 87;
@@ -54,8 +63,50 @@ body {
   --sk-primary-text: 51 65 85;
 }
 
+[data-color-scheme="dark"] {
+  --sk-bg: 15 23 42;
+  --sk-surface: 30 41 59;
+  --sk-surface-muted: 51 65 85;
+  --sk-border: 51 65 85;
+  --sk-text: 248 250 252;
+  --sk-text-muted: 148 163 184;
+  --sk-header-bg: 30 41 59;
+}
+
+[data-color-scheme="dark"][data-app-theme="emerald"] {
+  --sk-primary-light: 6 78 59;
+  --sk-primary-muted: 20 83 45;
+  --sk-primary-text: 167 243 208;
+}
+
+[data-color-scheme="dark"][data-app-theme="brown"] {
+  --sk-primary-light: 69 26 3;
+  --sk-primary-muted: 120 53 15;
+  --sk-primary-text: 253 230 138;
+}
+
+[data-color-scheme="dark"][data-app-theme="blue"] {
+  --sk-primary-light: 30 58 138;
+  --sk-primary-muted: 30 64 175;
+  --sk-primary-text: 191 219 254;
+}
+
+[data-color-scheme="dark"][data-app-theme="violet"] {
+  --sk-primary-light: 76 29 149;
+  --sk-primary-muted: 91 33 182;
+  --sk-primary-text: 221 214 254;
+}
+
+[data-color-scheme="dark"][data-app-theme="slate"] {
+  --sk-primary-light: 51 65 85;
+  --sk-primary-muted: 71 85 105;
+  --sk-primary-text: 226 232 240;
+}
+
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  background-color: rgb(var(--sk-bg));
+  color: rgb(var(--sk-text));
+  @apply antialiased;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   max-width: 100%;
@@ -84,7 +135,75 @@ body {
   }
 }
 
-/* Hide Next.js dev tools button overlapping mobile nav */
+@layer utilities {
+  .sk-surface {
+    background-color: rgb(var(--sk-surface));
+  }
+  .sk-surface-muted {
+    background-color: rgb(var(--sk-surface-muted));
+  }
+  .sk-border {
+    border-color: rgb(var(--sk-border));
+  }
+  .sk-text-muted {
+    color: rgb(var(--sk-text-muted));
+  }
+}
+
+[data-color-scheme="dark"] .bg-white {
+  background-color: rgb(var(--sk-surface)) !important;
+}
+[data-color-scheme="dark"] .bg-white\/90,
+[data-color-scheme="dark"] .bg-white\/95 {
+  background-color: rgb(var(--sk-header-bg) / 0.95) !important;
+}
+[data-color-scheme="dark"] .bg-slate-50 {
+  background-color: rgb(var(--sk-bg)) !important;
+}
+[data-color-scheme="dark"] .bg-slate-50\/80 {
+  background-color: rgb(var(--sk-surface-muted) / 0.8) !important;
+}
+[data-color-scheme="dark"] .bg-slate-100 {
+  background-color: rgb(var(--sk-surface-muted)) !important;
+}
+[data-color-scheme="dark"] .hover\:bg-slate-50:hover {
+  background-color: rgb(var(--sk-surface-muted)) !important;
+}
+[data-color-scheme="dark"] .hover\:bg-slate-100:hover {
+  background-color: rgb(var(--sk-surface-muted)) !important;
+}
+[data-color-scheme="dark"] .border-slate-200,
+[data-color-scheme="dark"] .border-slate-100 {
+  border-color: rgb(var(--sk-border)) !important;
+}
+[data-color-scheme="dark"] .text-slate-900 {
+  color: rgb(var(--sk-text)) !important;
+}
+[data-color-scheme="dark"] .text-slate-800 {
+  color: rgb(var(--sk-text)) !important;
+}
+[data-color-scheme="dark"] .text-slate-700 {
+  color: rgb(226 232 240) !important;
+}
+[data-color-scheme="dark"] .text-slate-600,
+[data-color-scheme="dark"] .text-slate-500,
+[data-color-scheme="dark"] .text-slate-400 {
+  color: rgb(var(--sk-text-muted)) !important;
+}
+[data-color-scheme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgb(var(--sk-border)) !important;
+}
+[data-color-scheme="dark"] input,
+[data-color-scheme="dark"] textarea,
+[data-color-scheme="dark"] select {
+  background-color: rgb(var(--sk-surface));
+  color: rgb(var(--sk-text));
+  border-color: rgb(var(--sk-border));
+}
+[data-color-scheme="dark"] .border-dashed {
+  border-color: rgb(var(--sk-border)) !important;
+}
+
 nextjs-portal,
 [data-nextjs-dev-tools-button],
 [data-next-badge-root] {

@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestUserId } from "@/lib/auth";
 import { isValidAppTheme, parseAppTheme } from "@/lib/app-theme";
+import { isValidColorScheme, parseColorScheme } from "@/lib/color-scheme";
 
-function serializeUserSettings(user: { appTheme: string }) {
+function serializeUserSettings(user: { appTheme: string; appColorScheme: string }) {
   return {
     appTheme: parseAppTheme(user.appTheme),
+    appColorScheme: parseColorScheme(user.appColorScheme),
   };
 }
 
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { appTheme: true },
+    select: { appTheme: true, appColorScheme: true },
   });
 
   if (!user) {
@@ -34,16 +36,32 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json()) as { appTheme?: string };
+    const body = (await request.json()) as { appTheme?: string; appColorScheme?: string };
 
-    if (!body.appTheme || !isValidAppTheme(body.appTheme)) {
-      return NextResponse.json({ error: "Некорректная тема" }, { status: 400 });
+    const data: { appTheme?: string; appColorScheme?: string } = {};
+
+    if (body.appTheme !== undefined) {
+      if (!isValidAppTheme(body.appTheme)) {
+        return NextResponse.json({ error: "Некорректная тема" }, { status: 400 });
+      }
+      data.appTheme = body.appTheme;
+    }
+
+    if (body.appColorScheme !== undefined) {
+      if (!isValidColorScheme(body.appColorScheme)) {
+        return NextResponse.json({ error: "Некорректная схема" }, { status: 400 });
+      }
+      data.appColorScheme = body.appColorScheme;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Нет данных для обновления" }, { status: 400 });
     }
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { appTheme: body.appTheme },
-      select: { appTheme: true },
+      data,
+      select: { appTheme: true, appColorScheme: true },
     });
 
     return NextResponse.json(serializeUserSettings(user));

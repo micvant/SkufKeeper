@@ -14,6 +14,8 @@ import { VoiceNameInput } from "@/components/VoiceNameInput";
 import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict, parseItemUnit, type ItemUnit } from "@/lib/item-units";
 import { EntityCustomFields } from "@/components/EntityCustomFields";
 import { Button } from "@/components/ui/Button";
+import { isNetworkOnline } from "@/lib/offline-sync";
+import { enqueueOperation, isTempItemId } from "@/lib/offline-queue";
 import type { CustomFieldValueDto } from "@/lib/custom-field";
 import type { Item, StorageLocation } from "@/types";
 
@@ -83,6 +85,33 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
     setError("");
 
     try {
+      if ((photo || removePhoto) && !isNetworkOnline()) {
+        setError("Изменение фото доступно только онлайн");
+        return;
+      }
+
+      const jsonPayload = {
+        name: name.trim(),
+        description: description.trim() || null,
+        locationId,
+        quantity: parseFloat(quantity.replace(",", ".")) || 1,
+        unit,
+        minQuantity: minQuantity.trim() ? parseFloat(minQuantity.replace(",", ".")) : null,
+        expiresAt: expiresAt || null,
+        iconName: !photo && (!currentPhoto || removePhoto) ? iconName : undefined,
+      };
+
+      if (!isNetworkOnline()) {
+        if (isTempItemId(id)) {
+          setError("Объект ещё не синхронизирован с сервером");
+          return;
+        }
+        enqueueOperation({ type: "item.update", itemId: id, payload: jsonPayload });
+        router.push(`/items/${id}`);
+        router.refresh();
+        return;
+      }
+
       const formData = new FormData();
       formData.append("name", name.trim());
       formData.append("description", description.trim());

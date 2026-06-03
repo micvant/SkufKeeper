@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { cacheLocationForOffline, cacheQrTokenForOffline } from "@/lib/offline-store";
+import { cacheJson, locationCacheKey } from "@/lib/offline-cache";
 import Image from "next/image";
 import { Header } from "@/components/Navigation";
 import { ItemCard, LocationCard } from "@/components/Cards";
@@ -61,6 +62,7 @@ export function LocationPageClient({
   useEffect(() => {
     setLocation(initialLocation);
     setCustomFields(initialLocation.customFields ?? []);
+    cacheJson(locationCacheKey(initialLocation.id), initialLocation);
   }, [initialLocation]);
   const [deleting, setDeleting] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
@@ -75,6 +77,27 @@ export function LocationPageClient({
       cacheQrTokenForOffline(location.qrToken, location.id);
     }
   }, [location.id, location.qrToken, location.name]);
+
+  useEffect(() => {
+    function onItemSynced(e: Event) {
+      const detail = (e as CustomEvent<{ tempId: string; item: { id: string } }>).detail;
+      setLocation((prev) => ({
+        ...prev,
+        items: prev.items?.map((it) =>
+          it.id === detail.tempId ? { ...it, id: detail.item.id } : it
+        ),
+      }));
+    }
+    function onSyncComplete() {
+      router.refresh();
+    }
+    window.addEventListener("skufkeeper-item-synced", onItemSynced);
+    window.addEventListener("skufkeeper-sync-complete", onSyncComplete);
+    return () => {
+      window.removeEventListener("skufkeeper-item-synced", onItemSynced);
+      window.removeEventListener("skufkeeper-sync-complete", onSyncComplete);
+    };
+  }, [router]);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [sections, setSections] = useState<Record<SectionKey, boolean>>({
     qr: false,
@@ -100,6 +123,20 @@ export function LocationPageClient({
 
     setDeletingItemId(itemId);
     try {
+      const { isNetworkOnline } = await import("@/lib/offline-sync");
+      const { enqueueOperation, isTempItemId } = await import("@/lib/offline-queue");
+
+      if (!isNetworkOnline()) {
+        if (!isTempItemId(itemId)) {
+          enqueueOperation({ type: "item.delete", itemId });
+        }
+        setLocation((prev) => ({
+          ...prev,
+          items: prev.items?.filter((item) => item.id !== itemId),
+        }));
+        return;
+      }
+
       const res = await fetch(`/api/items/${itemId}`, { method: "DELETE" });
       if (!res.ok) return;
       setLocation((prev) => ({

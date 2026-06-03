@@ -3,6 +3,8 @@
 import { Header } from "@/components/Navigation";
 import { useAppTheme } from "@/components/ThemeProvider";
 import { APP_THEME_IDS, APP_THEMES } from "@/lib/app-theme";
+import { COLOR_SCHEME_IDS, COLOR_SCHEMES } from "@/lib/color-scheme";
+import { Moon, Sun, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CustomFieldDefinitionsEditor } from "@/components/CustomFieldDefinitionsEditor";
@@ -10,7 +12,13 @@ import { BackupSettings } from "@/components/BackupSettings";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
-  const { theme, setTheme, saving } = useAppTheme();
+  const { theme, colorScheme, setTheme, setColorScheme, saving } = useAppTheme();
+
+  const schemeIcons = {
+    light: Sun,
+    dark: Moon,
+    system: Monitor,
+  } as const;
   const router = useRouter();
 
   async function handleLogout() {
@@ -25,7 +33,41 @@ export default function SettingsPage() {
 
       <div className="mx-auto max-w-lg space-y-6 px-4 py-6 md:px-8">
         <section>
-          <h2 className="text-sm font-medium text-slate-700">Цвет интерфейса</h2>
+          <h2 className="text-sm font-medium text-slate-700">Тема оформления</h2>
+          <p className="mt-1 text-xs text-slate-500">Светлая, тёмная или как в системе</p>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {COLOR_SCHEME_IDS.map((id) => {
+              const Icon = schemeIcons[id];
+              const selected = colorScheme === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setColorScheme(id)}
+                  className={cn(
+                    "flex flex-col items-center gap-1.5 rounded-xl border-2 px-2 py-3 text-center transition-colors",
+                    selected
+                      ? "border-primary bg-primary-light"
+                      : "border-slate-200 bg-white hover:border-slate-300"
+                  )}
+                >
+                  <Icon className={cn("h-5 w-5", selected ? "text-primary" : "text-slate-500")} />
+                  <span
+                    className={cn(
+                      "text-xs font-medium",
+                      selected ? "text-primary" : "text-slate-700"
+                    )}
+                  >
+                    {COLOR_SCHEMES[id].label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-sm font-medium text-slate-700">Акцентный цвет</h2>
           <p className="mt-1 text-xs text-slate-500">
             Сохраняется в вашем аккаунте и синхронизируется между устройствами
             {saving ? " · сохранение..." : ""}

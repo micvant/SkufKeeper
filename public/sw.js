@@ -1,4 +1,4 @@
-const CACHE = "skufkeeper-v1";
+const CACHE = "skufkeeper-v2";
 const SHELL = ["/", "/offline", "/manifest.json", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
@@ -23,8 +23,12 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
-  if (url.pathname.startsWith("/api/locations/by-token/")) {
-    event.respondWith(networkFirstQrLookup(request));
+  if (
+    url.pathname.startsWith("/api/locations/by-token/") ||
+    url.pathname.startsWith("/api/locations/") ||
+    url.pathname.startsWith("/api/items/")
+  ) {
+    event.respondWith(networkFirstApi(request));
     return;
   }
 
@@ -56,7 +60,7 @@ async function cacheFirst(request) {
   return response;
 }
 
-async function networkFirstQrLookup(request) {
+async function networkFirstApi(request) {
   try {
     const response = await fetch(request);
     if (response.ok) {

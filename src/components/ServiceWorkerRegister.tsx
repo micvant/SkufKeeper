@@ -1,36 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
-import { WifiOff } from "lucide-react";
+import { CloudOff, RefreshCw, WifiOff } from "lucide-react";
+import { useOfflineSync } from "@/components/OfflineSyncProvider";
 
 export function ServiceWorkerRegister() {
-  const [offline, setOffline] = useState(false);
+  const { online, queueCount, syncing, syncNow } = useOfflineSync();
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
-
-    const syncOnline = () => setOffline(!navigator.onLine);
-    syncOnline();
-    window.addEventListener("online", syncOnline);
-    window.addEventListener("offline", syncOnline);
-    return () => {
-      window.removeEventListener("online", syncOnline);
-      window.removeEventListener("offline", syncOnline);
-    };
   }, []);
 
-  if (!offline) return null;
+  if (online && queueCount === 0) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 flex items-center justify-center gap-2 border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900 safe-bottom md:left-56">
-      <WifiOff className="h-3.5 w-3.5 shrink-0" />
-      <span>Нет подключения — доступны сохранённые страницы</span>
-      <Link href="/offline" className="font-medium underline">
-        Подробнее
-      </Link>
+    <div
+      className={`fixed inset-x-0 z-50 flex flex-wrap items-center justify-center gap-2 border-t px-4 py-2 text-xs safe-bottom md:left-56 ${
+        online
+          ? "border-primary/30 bg-primary-light text-primary"
+          : "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100"
+      }`}
+    >
+      {!online ? (
+        <>
+          <WifiOff className="h-3.5 w-3.5 shrink-0" />
+          <span>Офлайн — изменения сохраняются в очередь</span>
+          <Link href="/offline" className="font-medium underline">
+            Подробнее
+          </Link>
+        </>
+      ) : (
+        <>
+          <CloudOff className="h-3.5 w-3.5 shrink-0" />
+          <span>
+            В очереди: {queueCount} {queueCount === 1 ? "изменение" : "изменений"}
+          </span>
+          <button
+            type="button"
+            onClick={() => syncNow()}
+            disabled={syncing}
+            className="inline-flex items-center gap-1 font-medium underline disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Синхронизация…" : "Синхронизировать"}
+          </button>
+        </>
+      )}
     </div>
   );
 }

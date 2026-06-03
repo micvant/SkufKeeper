@@ -79,6 +79,18 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
 
     setDeleting(true);
     try {
+      const { isNetworkOnline } = await import("@/lib/offline-sync");
+      const { enqueueOperation, isTempItemId } = await import("@/lib/offline-queue");
+
+      if (!isNetworkOnline()) {
+        if (!isTempItemId(item.id)) {
+          enqueueOperation({ type: "item.delete", itemId: item.id });
+        }
+        router.push(item.location ? `/locations/${item.location.id}` : "/");
+        router.refresh();
+        return;
+      }
+
       await fetch(`/api/items/${item.id}`, { method: "DELETE" });
       router.push(item.location ? `/locations/${item.location.id}` : "/");
     } finally {

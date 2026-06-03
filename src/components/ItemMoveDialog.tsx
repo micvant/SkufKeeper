@@ -6,6 +6,8 @@ import { ArrowRightLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import type { StorageLocation } from "@/types";
+import { isNetworkOnline } from "@/lib/offline-sync";
+import { enqueueOperation, isTempItemId } from "@/lib/offline-queue";
 
 interface ItemMoveDialogProps {
   itemId: string;
@@ -49,6 +51,22 @@ export function ItemMoveDialog({
     setLoading(true);
     setError("");
     try {
+      if (!isNetworkOnline()) {
+        if (isTempItemId(itemId)) {
+          setError("Дождитесь синхронизации нового объекта");
+          return;
+        }
+        enqueueOperation({
+          type: "item.move",
+          itemId,
+          locationId: targetId,
+          comment: comment || null,
+        });
+        onClose();
+        router.refresh();
+        return;
+      }
+
       const res = await fetch(`/api/items/${itemId}/move`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
