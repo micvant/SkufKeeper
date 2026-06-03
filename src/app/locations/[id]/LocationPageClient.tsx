@@ -113,7 +113,7 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
   const itemsCount = location.items?.length ?? 0;
 
   return (
-    <div className="pb-28 md:pb-6">
+    <div className="page-bottom-actions md:pb-6">
       <Header title={location.name} backHref={backHref} />
 
       <div className="mx-auto max-w-lg space-y-3 px-4 py-4 md:max-w-2xl md:px-8 md:py-6">
@@ -364,7 +364,7 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-lg safe-bottom md:hidden">
+      <div className="sticky-bottom-actions fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
         <div className="mx-auto flex max-w-lg gap-2">
           <Link href={`/locations/${id}/edit`} className="flex-1">
             <Button variant="secondary" size="lg" className="w-full">

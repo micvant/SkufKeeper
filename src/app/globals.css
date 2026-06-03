@@ -53,11 +53,26 @@ body {
 }
 
 .safe-top {
-  padding-top: env(safe-area-inset-top);
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
 }
 
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+.page-bottom-actions {
+  padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+}
+
+.sticky-bottom-actions {
+  padding: 0.75rem max(1rem, env(safe-area-inset-left, 0px))
+    max(0.75rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-right, 0px));
+}
+
+@media (min-width: 768px) {
+  .page-bottom-actions {
+    padding-bottom: 1.5rem;
+  }
 }
 
 /* Hide Next.js dev tools button overlapping mobile nav */
