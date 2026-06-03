@@ -47,12 +47,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="ru" data-app-theme={initialTheme} suppressHydrationWarning>
-      <body className="min-h-dvh">
+      <body className="min-h-dvh overflow-x-hidden">
         <ThemeProvider initialTheme={initialTheme}>
-          <div className="flex min-h-dvh">
+          <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
             <Sidebar />
-            <div className="flex flex-1 flex-col">
-              <main className="flex-1">{children}</main>
+            <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+              <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
             </div>
           </div>
         </ThemeProvider>

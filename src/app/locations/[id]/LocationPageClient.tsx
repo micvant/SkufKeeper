@@ -113,10 +113,10 @@ export function LocationPageClient({ location: initialLocation }: LocationPageCl
   const itemsCount = location.items?.length ?? 0;
 
   return (
-    <div className="page-bottom-actions md:pb-6">
+    <div className="page-bottom-actions min-w-0 max-w-full overflow-x-hidden md:pb-6">
       <Header title={location.name} backHref={backHref} />
 
-      <div className="mx-auto max-w-lg space-y-3 px-4 py-4 md:max-w-2xl md:px-8 md:py-6">
+      <div className="mx-auto w-full min-w-0 max-w-lg space-y-3 px-4 py-4 md:max-w-2xl md:px-8 md:py-6">
         <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           {location.photoPath ? (
             <div className="relative aspect-[16/10] max-h-48 w-full bg-slate-100">

@@ -19,6 +19,8 @@ interface LocationTreeProps {
   depth?: number;
 }
 
+const MAX_TREE_DEPTH_INDENT = 5;
+
 export function LocationTreeView({
   nodes,
   expanded,
@@ -30,7 +32,12 @@ export function LocationTreeView({
   }
 
   return (
-    <ul className={cn(depth > 0 && "ml-4 border-l border-slate-200 pl-2")}>
+    <ul
+      className={cn(
+        "min-w-0 max-w-full",
+        depth > 0 && depth <= MAX_TREE_DEPTH_INDENT && "ml-2 border-l border-slate-200 pl-2"
+      )}
+    >
       {nodes.map((node) => (
         <TreeLocationNode
           key={node.id}
@@ -59,8 +66,8 @@ function TreeLocationNode({
   const isExpanded = expanded.has(node.id);
 
   return (
-    <li className="py-0.5">
-      <div className="flex items-start gap-1 rounded-xl hover:bg-slate-50">
+    <li className="min-w-0 py-0.5">
+      <div className="flex min-w-0 items-start gap-1 rounded-xl hover:bg-slate-50">
         <button
           type="button"
           onClick={() => hasContent && onToggle(node.id)}
@@ -79,31 +86,33 @@ function TreeLocationNode({
 
         <Link
           href={`/locations/${node.id}`}
-          className="group min-w-0 flex-1 px-1 py-2"
+          className="group min-w-0 flex-1 overflow-hidden px-1 py-2"
         >
-          <div className="flex items-start gap-2">
+          <div className="flex min-w-0 items-start gap-2">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <div className="min-w-0">
-              <span className="font-medium text-slate-900 group-hover:text-primary">
+            <div className="min-w-0 flex-1">
+              <span className="block truncate font-medium text-slate-900 group-hover:text-primary">
                 {node.name}
               </span>
-              <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-500">
+              <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-slate-500">
                 {node.directItems > 0 && (
-                  <span className="inline-flex items-center gap-1">
-                    <Package className="h-3 w-3" />
-                    {node.directItems} здесь
-                    {node.directItemQuantity !== node.directItems &&
-                      ` (×${node.directItemQuantity})`}
+                  <span className="inline-flex max-w-full items-center gap-1">
+                    <Package className="h-3 w-3 shrink-0" />
+                    <span className="truncate">
+                      {node.directItems} здесь
+                      {node.directItemQuantity !== node.directItems &&
+                        ` (×${node.directItemQuantity})`}
+                    </span>
                   </span>
                 )}
                 {node.totalItems > node.directItems && (
-                  <span className="text-primary">
+                  <span className="truncate text-primary">
                     {node.totalItems} всего с вложенными
                   </span>
                 )}
                 {node.childLocations > 0 && (
                   <span className="inline-flex items-center gap-1">
-                    <FolderOpen className="h-3 w-3" />
+                    <FolderOpen className="h-3 w-3 shrink-0" />
                     {node.childLocations} влож.
                   </span>
                 )}
@@ -114,17 +123,17 @@ function TreeLocationNode({
       </div>
 
       {isExpanded && hasContent && (
-        <div className="ml-7">
+        <div className="min-w-0 pl-7">
           {node.items.length > 0 && (
-            <ul className="border-l border-slate-100 pl-3">
+            <ul className="min-w-0 border-l border-slate-100 pl-2">
               {node.items.map((item) => (
-                <li key={item.id}>
+                <li key={item.id} className="min-w-0">
                   <Link
                     href={`/items/${item.id}`}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-primary-light hover:text-primary"
+                    className="flex min-w-0 items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-primary-light hover:text-primary"
                   >
                     <Package className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                    <span className="truncate">{item.name}</span>
+                    <span className="min-w-0 flex-1 truncate">{item.name}</span>
                     {shouldShowItemQuantity(item.quantity, parseItemUnit(item.unit)) && (
                       <span className="shrink-0 text-xs text-slate-400">
                         {formatItemQuantity(item.quantity, parseItemUnit(item.unit))}

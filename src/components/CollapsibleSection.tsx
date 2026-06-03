@@ -37,8 +37,8 @@ export function CollapsibleSection({
   }
 
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-slate-200 bg-white", className)}>
-      <div className="flex items-center gap-2 px-3 py-3 sm:px-4">
+    <div className={cn("min-w-0 max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white", className)}>
+      <div className="flex flex-wrap items-center gap-2 px-3 py-3 sm:px-4">
         <button
           type="button"
           onClick={toggle}
@@ -52,20 +52,20 @@ export function CollapsibleSection({
               <ChevronRight className="h-4 w-4" />
             )}
           </span>
-          <span className="font-semibold text-slate-900">{title}</span>
+          <span className="min-w-0 truncate font-semibold text-slate-900">{title}</span>
           {count !== undefined && (
-            <span className="text-sm font-normal text-slate-500">({count})</span>
+            <span className="shrink-0 text-sm font-normal text-slate-500">({count})</span>
           )}
         </button>
         {actions && (
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex shrink-0 flex-wrap gap-1" onClick={(e) => e.stopPropagation()}>
             {actions}
           </div>
         )}
       </div>
 
       {isOpen && (
-        <div className={cn("border-t border-slate-100 px-3 pb-4 pt-2 sm:px-4", contentClassName)}>
+        <div className={cn("min-w-0 overflow-x-hidden border-t border-slate-100 px-3 pb-4 pt-2 sm:px-4", contentClassName)}>
           {children}
         </div>
       )}

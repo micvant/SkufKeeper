@@ -14,6 +14,7 @@ import {
   Settings,
   Menu,
   X,
+  ChevronLeft,
 } from "lucide-react";
 import { AppLogo } from "@/components/AppLogo";
 import { cn } from "@/lib/utils";
@@ -175,14 +176,15 @@ export function Sidebar() {
 
 export function Header({ title, backHref }: { title: string; backHref?: string }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-lg safe-top md:border-b">
-      <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3 md:max-w-none md:px-8">
+    <header className="sticky top-0 z-40 w-full max-w-full overflow-x-hidden border-b border-slate-200 bg-white/90 backdrop-blur-lg safe-top md:border-b">
+      <div className="mx-auto flex w-full min-w-0 max-w-3xl items-center gap-2 px-4 py-3 md:max-w-none md:px-8">
         {backHref && (
           <Link
             href={backHref}
-            className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700 md:hidden"
+            className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 md:hidden"
+            aria-label="Назад"
           >
-            ←
+            <ChevronLeft className="h-7 w-7" strokeWidth={2} />
           </Link>
         )}
         <h1 className="min-w-0 flex-1 truncate text-lg font-semibold text-slate-900">{title}</h1>

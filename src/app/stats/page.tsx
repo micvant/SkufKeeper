@@ -47,10 +47,10 @@ export default function StatsPage() {
   }
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full overflow-x-hidden">
       <Header title="Статистика" backHref="/" />
 
-      <div className="mx-auto max-w-3xl px-4 py-6 md:max-w-none md:px-8">
+      <div className="mx-auto w-full min-w-0 max-w-3xl px-4 py-6 md:max-w-none md:px-8">
         {loading ? (
           <p className="text-center text-slate-500">Загрузка...</p>
         ) : stats ? (
