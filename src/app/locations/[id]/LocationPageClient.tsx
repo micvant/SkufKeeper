@@ -41,7 +41,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="px-4 py-3.5">
       <p className="text-xs font-medium text-slate-400">{label}</p>
-      <p className="mt-1 text-sm leading-relaxed text-slate-800">{value}</p>
+      <p className="mt-1 text-sm leading-relaxed text-slate-800 dark:text-slate-200">{value}</p>
     </div>
   );
 }
@@ -219,7 +219,7 @@ export function LocationPageClient({
             <div
               className={`flex items-center gap-4 p-4 ${getLocationColorStyles(location.color).bg}`}
             >
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-white/70">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary-light">
                 <EntityIcon
                   iconName={location.iconName}
                   fallback={DEFAULT_LOCATION_ICON}
@@ -229,12 +229,12 @@ export function LocationPageClient({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-slate-700">
-                    <FolderOpen className="h-3.5 w-3.5 text-primary" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                    <FolderOpen className="h-3.5 w-3.5" />
                     {childrenCount} {childrenCount === 1 ? "место" : "мест"}
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-slate-700">
-                    <Package className="h-3.5 w-3.5 text-primary" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                    <Package className="h-3.5 w-3.5" />
                     {itemsCount} {itemsCount === 1 ? "объект" : "объектов"}
                   </span>
                 </div>
