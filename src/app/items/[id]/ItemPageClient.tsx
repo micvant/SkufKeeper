@@ -162,7 +162,7 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <span className="inline-flex rounded-full bg-primary-light px-3 py-1 text-sm font-semibold text-primary">
+                <span className="sk-accent-chip inline-flex rounded-full px-3 py-1 text-sm font-semibold">
                   {quantityLabel}
                 </span>
               </div>
@@ -178,7 +178,7 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
             {item.location && (
               <Link
                 href={`/locations/${item.location.id}`}
-                className="inline-flex min-w-0 flex-1 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-primary-light hover:text-primary sm:flex-none"
+                className="inline-flex min-w-0 flex-1 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-primary-light hover:text-primary-foreground sm:flex-none"
               >
                 <MapPin className="h-4 w-4 shrink-0 text-primary" />
                 <span className="truncate">{item.location.name}</span>

@@ -74,33 +74,43 @@ body {
 }
 
 [data-color-scheme="dark"][data-app-theme="emerald"] {
+  --sk-primary: 52 211 153;
+  --sk-primary-hover: 16 185 129;
   --sk-primary-light: 6 78 59;
   --sk-primary-muted: 20 83 45;
-  --sk-primary-text: 167 243 208;
+  --sk-primary-text: 209 250 229;
 }
 
 [data-color-scheme="dark"][data-app-theme="brown"] {
-  --sk-primary-light: 69 26 3;
+  --sk-primary: 251 191 36;
+  --sk-primary-hover: 245 158 11;
+  --sk-primary-light: 92 40 12;
   --sk-primary-muted: 120 53 15;
-  --sk-primary-text: 253 230 138;
+  --sk-primary-text: 254 243 199;
 }
 
 [data-color-scheme="dark"][data-app-theme="blue"] {
+  --sk-primary: 96 165 250;
+  --sk-primary-hover: 59 130 246;
   --sk-primary-light: 30 58 138;
-  --sk-primary-muted: 30 64 175;
-  --sk-primary-text: 191 219 254;
+  --sk-primary-muted: 37 99 235;
+  --sk-primary-text: 219 234 254;
 }
 
 [data-color-scheme="dark"][data-app-theme="violet"] {
+  --sk-primary: 167 139 250;
+  --sk-primary-hover: 196 181 253;
   --sk-primary-light: 76 29 149;
   --sk-primary-muted: 91 33 182;
-  --sk-primary-text: 221 214 254;
+  --sk-primary-text: 245 243 255;
 }
 
 [data-color-scheme="dark"][data-app-theme="slate"] {
-  --sk-primary-light: 51 65 85;
-  --sk-primary-muted: 71 85 105;
-  --sk-primary-text: 226 232 240;
+  --sk-primary: 203 213 225;
+  --sk-primary-hover: 226 232 240;
+  --sk-primary-light: 71 85 105;
+  --sk-primary-muted: 100 116 139;
+  --sk-primary-text: 248 250 252;
 }
 
 body {
@@ -135,7 +145,7 @@ body {
   }
 }
 
-@layer utilities {
+@layer components {
   .sk-surface {
     background-color: rgb(var(--sk-surface));
   }
@@ -148,8 +158,22 @@ body {
   .sk-text-muted {
     color: rgb(var(--sk-text-muted));
   }
+  .sk-accent-chip {
+    @apply bg-primary-light text-primary-foreground;
+  }
 }
 
+[data-color-scheme="dark"] .bg-primary-light,
+[data-color-scheme="dark"] .bg-primary-light.text-primary,
+[data-color-scheme="dark"] .bg-primary-light .text-primary,
+[data-color-scheme="dark"] .hover\:bg-primary-light:hover.hover\:text-primary:hover,
+[data-color-scheme="dark"] .hover\:bg-primary-light:hover .text-primary {
+  color: rgb(var(--sk-primary-text)) !important;
+}
+[data-color-scheme="dark"] .bg-primary-light\/50,
+[data-color-scheme="dark"] .bg-primary-light\/50.text-primary {
+  color: rgb(var(--sk-primary-text)) !important;
+}
 [data-color-scheme="dark"] .bg-white {
   background-color: rgb(var(--sk-surface)) !important;
 }

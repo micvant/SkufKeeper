@@ -97,7 +97,7 @@ export function BurgerMenu() {
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-4 py-3.5 text-base font-medium transition-colors",
                       active
-                        ? "bg-primary-light text-primary"
+                        ? "bg-primary-light text-primary-foreground"
                         : "text-slate-800 hover:bg-slate-100"
                     )}
                   >
@@ -160,7 +160,7 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-primary-light text-primary"
+                  ? "bg-primary-light text-primary-foreground"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
               )}
             >

@@ -47,8 +47,8 @@ export function FavoriteButton({
       className={cn(
         "inline-flex h-10 w-10 items-center justify-center rounded-xl border transition-colors",
         favorite
-          ? "border-amber-300 bg-amber-50 text-amber-500"
-          : "border-slate-200 bg-white text-slate-400 hover:text-amber-500"
+          ? "border-amber-400 bg-amber-50 text-amber-500 dark:border-amber-500 dark:bg-amber-950/50 dark:text-amber-400"
+          : "border-slate-200 bg-white text-slate-500 hover:border-amber-300 hover:text-amber-500 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-amber-500 dark:hover:text-amber-400"
       )}
       aria-label={favorite ? "Убрать из избранного" : "В избранное"}
       title={favorite ? "В избранном" : "В избранное"}

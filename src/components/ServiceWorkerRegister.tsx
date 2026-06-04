@@ -20,7 +20,7 @@ export function ServiceWorkerRegister() {
     <div
       className={`fixed inset-x-0 z-50 flex flex-wrap items-center justify-center gap-2 border-t px-4 py-2 text-xs safe-bottom md:left-56 ${
         online
-          ? "border-primary/30 bg-primary-light text-primary"
+          ? "border-primary/30 bg-primary-light text-primary-foreground"
           : "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-100"
       }`}
     >

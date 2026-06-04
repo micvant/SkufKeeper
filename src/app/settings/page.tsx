@@ -51,11 +51,11 @@ export default function SettingsPage() {
                       : "border-slate-200 bg-white hover:border-slate-300"
                   )}
                 >
-                  <Icon className={cn("h-5 w-5", selected ? "text-primary" : "text-slate-500")} />
+                  <Icon className={cn("h-5 w-5", selected ? "text-primary-foreground" : "text-slate-500")} />
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      selected ? "text-primary" : "text-slate-700"
+                      selected ? "text-primary-foreground" : "text-slate-700"
                     )}
                   >
                     {COLOR_SCHEMES[id].label}
@@ -93,7 +93,7 @@ export default function SettingsPage() {
                   <span
                     className={cn(
                       "text-sm font-medium",
-                      selected ? "text-primary" : "text-slate-700"
+                      selected ? "text-primary-foreground" : "text-slate-700"
                     )}
                   >
                     {t.label}

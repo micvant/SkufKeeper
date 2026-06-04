@@ -130,7 +130,7 @@ function TreeLocationNode({
                 <li key={item.id} className="min-w-0">
                   <Link
                     href={`/items/${item.id}`}
-                    className="flex min-w-0 items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-primary-light hover:text-primary"
+                    className="flex min-w-0 items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-sm text-slate-700 hover:bg-primary-light hover:text-primary-foreground"
                   >
                     <Package className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                     <span className="min-w-0 flex-1 truncate">{item.name}</span>

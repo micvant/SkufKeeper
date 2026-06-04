@@ -115,7 +115,7 @@ export default async function HomePage() {
         <div className="mb-4 hidden flex-wrap gap-2 md:flex">
           <Link
             href="/locations/new"
-            className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary-light px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary-muted"
+            className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary-light px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-muted"
           >
             <Plus className="h-4 w-4" />
             Новое место

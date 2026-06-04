@@ -108,7 +108,7 @@ export function IconPicker({
                       className={cn(
                         "flex aspect-square items-center justify-center rounded-xl border-2 transition-colors",
                         isSelected
-                          ? "border-primary bg-primary-light text-primary"
+                          ? "border-primary bg-primary-light text-primary-foreground"
                           : "border-slate-200 bg-white text-slate-500 hover:border-primary/30 hover:bg-primary-light/50"
                       )}
                       title={name}

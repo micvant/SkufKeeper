@@ -229,11 +229,11 @@ export function LocationPageClient({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                  <span className="sk-accent-chip inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium">
                     <FolderOpen className="h-3.5 w-3.5" />
                     {childrenCount} {childrenCount === 1 ? "место" : "мест"}
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                  <span className="sk-accent-chip inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium">
                     <Package className="h-3.5 w-3.5" />
                     {itemsCount} {itemsCount === 1 ? "объект" : "объектов"}
                   </span>
@@ -245,11 +245,11 @@ export function LocationPageClient({
           <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 py-3">
             {location.photoPath && (
               <>
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                <span className="sk-accent-chip inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium">
                   <FolderOpen className="h-3.5 w-3.5" />
                   {childrenCount} {childrenCount === 1 ? "место" : "мест"}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary-light px-3 py-1 text-sm font-medium text-primary">
+                <span className="sk-accent-chip inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium">
                   <Package className="h-3.5 w-3.5" />
                   {itemsCount} {itemsCount === 1 ? "объект" : "объектов"}
                 </span>
@@ -258,7 +258,7 @@ export function LocationPageClient({
             {location.parent && (
               <Link
                 href={`/locations/${location.parent.id}`}
-                className="inline-flex min-w-0 flex-1 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-primary-light hover:text-primary sm:flex-none"
+                className="inline-flex min-w-0 flex-1 items-center gap-1.5 rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-primary-light hover:text-primary-foreground sm:flex-none"
               >
                 <MapPin className="h-4 w-4 shrink-0 text-primary" />
                 <span className="truncate">{location.parent.name}</span>
