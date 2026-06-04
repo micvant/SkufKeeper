@@ -183,6 +183,10 @@ body {
 [data-color-scheme="dark"] .bg-white\/70 {
   background-color: rgb(var(--sk-surface-muted) / 0.95) !important;
 }
+[data-color-scheme="dark"] .sticky-bottom-actions {
+  background-color: rgb(30 41 59 / 0.97) !important;
+  border-color: rgb(71 85 105) !important;
+}
 [data-color-scheme="dark"] .bg-red-50 {
   background-color: rgb(127 29 29 / 0.35) !important;
 }

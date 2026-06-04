@@ -273,7 +273,7 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
         onClose={() => setMoveOpen(false)}
       />
 
-      <div className="sticky-bottom-actions fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-lg md:hidden">
+      <div className="sticky-bottom-actions fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-lg dark:border-slate-600 dark:bg-slate-800/95 md:hidden">
         <div className="mx-auto flex max-w-lg gap-2">
           <Link href={`/items/${item.id}/edit`} className="flex-1">
             <Button variant="secondary" size="lg" className="w-full">
