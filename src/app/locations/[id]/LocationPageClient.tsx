@@ -16,6 +16,7 @@ import {
   ChevronRight,
   ArrowRightLeft,
   Copy,
+  Sparkles,
 } from "lucide-react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { cacheLocationForOffline, cacheQrTokenForOffline } from "@/lib/offline-store";
@@ -351,23 +352,39 @@ export function LocationPageClient({
             open={sections.items}
             onOpenChange={(open) => setSection("items", open)}
             actions={
-              <Link href={`/locations/${id}/items/new`}>
-                <Button size="sm">
-                  <Plus className="h-4 w-4" />
-                  <span className="hidden sm:inline">Добавить</span>
-                </Button>
-              </Link>
+              <div className="flex gap-1">
+                <Link href={`/locations/${id}/scan-items`}>
+                  <Button size="sm" variant="secondary" title="Добавить по фото (ИИ)">
+                    <Sparkles className="h-4 w-4" />
+                    <span className="hidden sm:inline">По фото</span>
+                  </Button>
+                </Link>
+                <Link href={`/locations/${id}/items/new`}>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Добавить</span>
+                  </Button>
+                </Link>
+              </div>
             }
           >
             {itemsCount === 0 ? (
               <div className="rounded-xl border-2 border-dashed border-slate-200 p-8 text-center">
                 <p className="text-sm text-slate-500">Здесь пока ничего нет</p>
-                <Link href={`/locations/${id}/items/new`} className="mt-4 inline-block">
-                  <Button size="sm">
-                    <Plus className="h-4 w-4" />
-                    Добавить объект
-                  </Button>
-                </Link>
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <Link href={`/locations/${id}/scan-items`}>
+                    <Button size="sm" variant="secondary">
+                      <Sparkles className="h-4 w-4" />
+                      По фото (ИИ)
+                    </Button>
+                  </Link>
+                  <Link href={`/locations/${id}/items/new`}>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4" />
+                      Добавить объект
+                    </Button>
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">

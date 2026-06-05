@@ -7,6 +7,7 @@
 - **Места хранения** — создавайте места с названием, описанием и фото; внутри места можно добавлять вложенные места (полки, ящики)
 - **Объекты** — добавляйте вещи в места с фото, описанием и количеством
 - **Поиск** — быстрый поиск объектов по названию
+- **Добавление по фото (ИИ)** — Yandex GPT или Google Gemini распознаёт предметы на снимке; вы подтверждаете список и добавляете в место
 - **Статистика** — сводка по количеству мест и объектов, дерево структуры хранения
 - **Адаптивный интерфейс** — удобно на ПК и iPhone
 - **PWA** — можно добавить на домашний экран iPhone как приложение
@@ -52,8 +53,14 @@ npm run dev
    ```
    DATABASE_URL=file:/data/dev.db
    NEXT_PUBLIC_APP_URL=https://skufkeeper-production.up.railway.app
+   YANDEX_API_KEY=ваш_api_ключ
+   YANDEX_FOLDER_ID=ид_каталога
    ```
    (URL возьмите из **Settings → Networking → Public URL**)
+
+   **Распознавание по фото (РФ):** [console.cloud.yandex.ru](https://console.cloud.yandex.ru/) → сервис **Yandex AI** / Foundation Models → API-ключ и ID каталога (`folder_id`). В каталоге включите доступ к моделям; для фото используется `gemma-3-27b-it`.
+
+   Альтернатива: `GEMINI_API_KEY` из [aistudio.google.com/apikey](https://aistudio.google.com/apikey), если доступен в вашем регионе.
 4. **Удалите** кастомный Start Command в UI — используется `railway.toml`
 5. **Redeploy**
 
