@@ -316,6 +316,7 @@ nextjs-portal,
 .sk-date-field {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
 }
 
 .sk-date-input {
@@ -323,14 +324,31 @@ nextjs-portal,
   width: 100%;
   max-width: 100%;
   min-width: 0;
+  min-height: 2.75rem;
   box-sizing: border-box;
-  -webkit-appearance: none;
-  appearance: none;
 }
 
 .sk-date-input::-webkit-date-and-time-value {
-  min-width: 0;
   text-align: left;
+}
+
+.sk-date-input::-webkit-datetime-edit {
+  flex: 1;
+  min-width: 0;
+}
+
+.sk-date-input::-webkit-datetime-edit-fields-wrapper {
+  width: 100%;
+  min-width: 0;
+}
+
+.sk-date-input.sk-date-input--empty::-webkit-datetime-edit {
+  color: transparent;
+}
+
+.sk-date-input::-webkit-calendar-picker-indicator {
+  margin-left: auto;
+  cursor: pointer;
 }
 
 [data-color-scheme="dark"] .sk-date-input {
