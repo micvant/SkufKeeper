@@ -8,7 +8,7 @@ import {
 
 const DEFAULT_BASE_URL = "https://ai.api.cloud.yandex.net/v1";
 /** Мультимодальная модель в AI Studio (картинки + текст). См. «Популярные модели» → Qwen3.6 35B */
-const DEFAULT_VISION_MODEL = "qwen3.6-35b-a3b";
+const DEFAULT_VISION_MODEL = "qwen3.6-35b-a3b/latest";
 
 export function getYandexVisionModel(): string {
   return process.env.YANDEX_VISION_MODEL?.trim() || DEFAULT_VISION_MODEL;
