@@ -47,7 +47,7 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-hidden">
+    <div className="min-w-0 max-w-full">
       <Header title="Статистика" backHref="/" />
 
       <div className="mx-auto w-full min-w-0 max-w-3xl px-4 py-6 md:max-w-none md:px-8">

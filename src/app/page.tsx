@@ -95,16 +95,17 @@ export default async function HomePage() {
 
   return (
     <div>
-      <div className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur-lg safe-top md:hidden">
+      <header className="app-page-header md:hidden">
         <div className="flex items-center gap-2.5 px-4 py-3">
           <AppLogo size={36} />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg font-bold text-slate-900">SkufKeeper</h1>
+            <h1 className="truncate text-lg font-bold text-slate-900 dark:text-slate-100">SkufKeeper</h1>
             <p className="truncate text-xs text-slate-500">{statsLine}</p>
           </div>
           <BurgerMenu />
         </div>
-      </div>
+      </header>
+      <div className="app-page-header-spacer md:hidden" aria-hidden />
 
       <div className="hidden border-b border-slate-200 bg-white px-8 py-6 md:block">
         <h1 className="text-2xl font-bold text-slate-900">Места хранения</h1>

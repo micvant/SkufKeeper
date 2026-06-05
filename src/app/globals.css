@@ -122,8 +122,40 @@ body {
   max-width: 100%;
 }
 
+:root {
+  --sk-safe-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  --sk-app-header-height: calc(3.5rem + var(--sk-safe-top));
+}
+
 .safe-top {
-  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-top: var(--sk-safe-top);
+}
+
+.app-page-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  border-bottom: 1px solid rgb(var(--sk-border));
+  background-color: rgb(var(--sk-header-bg) / 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-top: var(--sk-safe-top);
+}
+
+@media (min-width: 768px) {
+  .app-page-header {
+    left: 16rem;
+  }
+}
+
+.app-page-header-spacer {
+  height: var(--sk-app-header-height);
+  flex-shrink: 0;
 }
 
 .safe-bottom {

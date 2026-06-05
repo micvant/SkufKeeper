@@ -74,10 +74,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <OfflineAwareLayout>
                   <SwipeBackHandler />
                   <ServiceWorkerRegister />
-                  <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
+                  <div className="flex min-h-dvh min-w-0 w-full max-w-full">
                     <Sidebar />
-                    <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-                      <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+                    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                      <main className="min-h-0 min-w-0 flex-1">{children}</main>
                     </div>
                   </div>
                 </OfflineAwareLayout>
@@ -86,10 +86,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <OfflineAwareLayout>
                 <SwipeBackHandler />
                 <ServiceWorkerRegister />
-                <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
+                <div className="flex min-h-dvh min-w-0 w-full max-w-full">
                   <Sidebar />
-                  <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-                    <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+                  <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                    <main className="min-h-0 min-w-0 flex-1">{children}</main>
                   </div>
                 </div>
               </OfflineAwareLayout>

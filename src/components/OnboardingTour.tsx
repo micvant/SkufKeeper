@@ -72,12 +72,12 @@ export function OnboardingTour({ open, onComplete, onSkip }: OnboardingTourProps
 
         <div
           className={cn(
-            "mx-4 mt-2 flex aspect-[4/3] items-center justify-center rounded-2xl bg-gradient-to-br",
+            "mx-4 mt-2 flex aspect-[4/3] min-h-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br p-5",
             step.illustrationClass
           )}
         >
-          <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-white/80 shadow-lg dark:bg-slate-900/50">
-            <Icon className="h-14 w-14 text-primary-foreground" strokeWidth={1.5} />
+          <div className="flex h-[4.5rem] w-[4.5rem] max-w-full max-h-full shrink-0 items-center justify-center rounded-2xl bg-white/90 ring-1 ring-black/5 dark:bg-slate-900/60 dark:ring-white/10">
+            <Icon className="h-9 w-9 text-primary-foreground" strokeWidth={1.5} />
           </div>
         </div>
 

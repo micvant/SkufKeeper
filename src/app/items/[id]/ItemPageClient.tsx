@@ -114,7 +114,7 @@ export function ItemPageClient({ item }: ItemPageClientProps) {
   }
 
   return (
-    <div className="page-bottom-actions min-w-0 max-w-full overflow-x-hidden md:pb-6">
+    <div className="page-bottom-actions min-w-0 max-w-full md:pb-6">
       <Header title={item.name} backHref={`/locations/${item.location?.id}`} />
 
       <div className="mx-auto w-full min-w-0 max-w-lg space-y-3 px-4 py-4 md:max-w-2xl md:px-8 md:py-6">

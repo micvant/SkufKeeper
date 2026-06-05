@@ -141,7 +141,7 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-slate-200 md:bg-white">
+    <aside className="hidden md:sticky md:top-0 md:flex md:h-dvh md:w-64 md:shrink-0 md:flex-col md:border-r md:border-slate-200 md:bg-white">
       <div className="flex items-center gap-2 border-b border-slate-200 px-6 py-5">
         <AppLogo size={40} />
         <div>
@@ -188,29 +188,34 @@ export function Header({
     "-ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200";
 
   return (
-    <header className="sticky top-0 z-40 w-full max-w-full overflow-x-hidden border-b border-slate-200 bg-white/90 backdrop-blur-lg safe-top md:border-b">
-      <div className="mx-auto flex w-full min-w-0 max-w-3xl items-center gap-2 px-4 py-3 md:max-w-none md:px-8">
-        {onBack ? (
-          <button
-            type="button"
-            onClick={onBack}
-            className={`${backClassName} md:hidden`}
-            aria-label="Назад"
-          >
-            <ChevronLeft className="h-7 w-7" strokeWidth={2} />
-          </button>
-        ) : (
-          backHref && (
-            <Link href={backHref} className={`${backClassName} md:hidden`} aria-label="Назад">
+    <>
+      <header className="app-page-header">
+        <div className="mx-auto flex w-full min-w-0 max-w-3xl items-center gap-2 px-4 py-3 md:max-w-none md:px-8">
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className={`${backClassName} md:hidden`}
+              aria-label="Назад"
+            >
               <ChevronLeft className="h-7 w-7" strokeWidth={2} />
-            </Link>
-          )
-        )}
-        <h1 className="min-w-0 flex-1 truncate text-lg font-semibold text-slate-900">{title}</h1>
-        <div className="md:hidden">
-          <BurgerMenu />
+            </button>
+          ) : (
+            backHref && (
+              <Link href={backHref} className={`${backClassName} md:hidden`} aria-label="Назад">
+                <ChevronLeft className="h-7 w-7" strokeWidth={2} />
+              </Link>
+            )
+          )}
+          <h1 className="min-w-0 flex-1 truncate text-lg font-semibold text-slate-900 dark:text-slate-100">
+            {title}
+          </h1>
+          <div className="md:hidden">
+            <BurgerMenu />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <div className="app-page-header-spacer" aria-hidden />
+    </>
   );
 }
