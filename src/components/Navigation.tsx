@@ -174,18 +174,37 @@ export function Sidebar() {
   );
 }
 
-export function Header({ title, backHref }: { title: string; backHref?: string }) {
+export function Header({
+  title,
+  backHref,
+  onBack,
+}: {
+  title: string;
+  backHref?: string;
+  /** При несохранённых изменениях — вызывается вместо перехода по ссылке */
+  onBack?: () => void;
+}) {
+  const backClassName =
+    "-ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200";
+
   return (
     <header className="sticky top-0 z-40 w-full max-w-full overflow-x-hidden border-b border-slate-200 bg-white/90 backdrop-blur-lg safe-top md:border-b">
       <div className="mx-auto flex w-full min-w-0 max-w-3xl items-center gap-2 px-4 py-3 md:max-w-none md:px-8">
-        {backHref && (
-          <Link
-            href={backHref}
-            className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 md:hidden"
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className={`${backClassName} md:hidden`}
             aria-label="Назад"
           >
             <ChevronLeft className="h-7 w-7" strokeWidth={2} />
-          </Link>
+          </button>
+        ) : (
+          backHref && (
+            <Link href={backHref} className={`${backClassName} md:hidden`} aria-label="Назад">
+              <ChevronLeft className="h-7 w-7" strokeWidth={2} />
+            </Link>
+          )
         )}
         <h1 className="min-w-0 flex-1 truncate text-lg font-semibold text-slate-900">{title}</h1>
         <div className="md:hidden">

@@ -4,10 +4,15 @@ import { getRequestUserId } from "@/lib/auth";
 import { isValidAppTheme, parseAppTheme } from "@/lib/app-theme";
 import { isValidColorScheme, parseColorScheme } from "@/lib/color-scheme";
 
-function serializeUserSettings(user: { appTheme: string; appColorScheme: string }) {
+function serializeUserSettings(user: {
+  appTheme: string;
+  appColorScheme: string;
+  onboardingCompleted: boolean;
+}) {
   return {
     appTheme: parseAppTheme(user.appTheme),
     appColorScheme: parseColorScheme(user.appColorScheme),
+    onboardingCompleted: user.onboardingCompleted,
   };
 }
 
@@ -19,7 +24,7 @@ export async function GET(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { appTheme: true, appColorScheme: true },
+    select: { appTheme: true, appColorScheme: true, onboardingCompleted: true },
   });
 
   if (!user) {
@@ -36,9 +41,17 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const body = (await request.json()) as { appTheme?: string; appColorScheme?: string };
+    const body = (await request.json()) as {
+      appTheme?: string;
+      appColorScheme?: string;
+      onboardingCompleted?: boolean;
+    };
 
-    const data: { appTheme?: string; appColorScheme?: string } = {};
+    const data: {
+      appTheme?: string;
+      appColorScheme?: string;
+      onboardingCompleted?: boolean;
+    } = {};
 
     if (body.appTheme !== undefined) {
       if (!isValidAppTheme(body.appTheme)) {
@@ -54,6 +67,13 @@ export async function PATCH(request: NextRequest) {
       data.appColorScheme = body.appColorScheme;
     }
 
+    if (body.onboardingCompleted !== undefined) {
+      if (typeof body.onboardingCompleted !== "boolean") {
+        return NextResponse.json({ error: "Некорректное значение onboarding" }, { status: 400 });
+      }
+      data.onboardingCompleted = body.onboardingCompleted;
+    }
+
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Нет данных для обновления" }, { status: 400 });
     }
@@ -61,7 +81,7 @@ export async function PATCH(request: NextRequest) {
     const user = await prisma.user.update({
       where: { id: userId },
       data,
-      select: { appTheme: true, appColorScheme: true },
+      select: { appTheme: true, appColorScheme: true, onboardingCompleted: true },
     });
 
     return NextResponse.json(serializeUserSettings(user));

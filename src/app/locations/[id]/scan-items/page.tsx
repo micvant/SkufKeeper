@@ -3,29 +3,37 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Check, Loader2, Sparkles, Trash2, X } from "lucide-react";
+import { Camera, Loader2, Sparkles, X } from "lucide-react";
 import { Header } from "@/components/Navigation";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { ScanItemDraftCard, type ScanItemDraft } from "@/components/ScanItemDraftCard";
 import { AI_MAX_PHOTOS } from "@/lib/ai-constants";
+import { DEFAULT_ITEM_UNIT, parseItemQuantityStrict } from "@/lib/item-units";
 import { cn } from "@/lib/utils";
-
-type DraftItem = {
-  id: string;
-  name: string;
-  quantity: string;
-  selected: boolean;
-};
 
 function newDraftId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function createEmptyDraft(partial?: Partial<Pick<ScanItemDraft, "name" | "quantity">>): ScanItemDraft {
+  return {
+    id: newDraftId(),
+    name: partial?.name ?? "",
+    quantity: partial?.quantity ?? "1",
+    unit: DEFAULT_ITEM_UNIT,
+    description: "",
+    photo: null,
+    photoPreview: null,
+    iconName: null,
+    selected: true,
+  };
 }
 
 export default function ScanItemsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [locationId, setLocationId] = useState("");
   const [photos, setPhotos] = useState<{ id: string; file: File; preview: string }[]>([]);
-  const [drafts, setDrafts] = useState<DraftItem[]>([]);
+  const [drafts, setDrafts] = useState<ScanItemDraft[]>([]);
   const [step, setStep] = useState<"photos" | "review">("photos");
   const [recognizing, setRecognizing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -43,9 +51,18 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
     for (const p of list) URL.revokeObjectURL(p.preview);
   }, []);
 
+  const revokeDraftPhotos = useCallback((list: ScanItemDraft[]) => {
+    for (const d of list) {
+      if (d.photoPreview) URL.revokeObjectURL(d.photoPreview);
+    }
+  }, []);
+
   useEffect(() => {
-    return () => revokePreviews(photos);
-  }, [photos, revokePreviews]);
+    return () => {
+      revokePreviews(photos);
+      revokeDraftPhotos(drafts);
+    };
+  }, [photos, drafts, revokePreviews, revokeDraftPhotos]);
 
   function addPhotos(fileList: FileList | null) {
     if (!fileList?.length) return;
@@ -92,13 +109,11 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
         return;
       }
 
+      revokeDraftPhotos(drafts);
       setDrafts(
-        items.map((item) => ({
-          id: newDraftId(),
-          name: item.name,
-          quantity: String(item.quantity),
-          selected: true,
-        }))
+        items.map((item) =>
+          createEmptyDraft({ name: item.name, quantity: String(item.quantity) })
+        )
       );
       setStep("review");
     } catch (err) {
@@ -108,12 +123,56 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
     }
   }
 
-  function updateDraft(id: string, patch: Partial<DraftItem>) {
+  function updateDraft(id: string, patch: Partial<ScanItemDraft>) {
     setDrafts((prev) => prev.map((d) => (d.id === id ? { ...d, ...patch } : d)));
   }
 
   function removeDraft(id: string) {
-    setDrafts((prev) => prev.filter((d) => d.id !== id));
+    setDrafts((prev) => {
+      const target = prev.find((d) => d.id === id);
+      if (target?.photoPreview) URL.revokeObjectURL(target.photoPreview);
+      return prev.filter((d) => d.id !== id);
+    });
+  }
+
+  async function createItem(draft: ScanItemDraft, locId: string) {
+    const quantity = parseItemQuantityStrict(draft.quantity);
+    if (quantity === null) {
+      throw new Error(`Укажите корректное количество для «${draft.name.trim()}»`);
+    }
+
+    const payload = {
+      name: draft.name.trim(),
+      description: draft.description.trim() || null,
+      locationId: locId,
+      quantity,
+      unit: draft.unit,
+      iconName: !draft.photo ? draft.iconName : null,
+    };
+
+    if (draft.photo) {
+      const formData = new FormData();
+      formData.append("name", payload.name);
+      formData.append("locationId", locId);
+      formData.append("quantity", draft.quantity);
+      formData.append("unit", draft.unit);
+      if (payload.description) formData.append("description", payload.description);
+      formData.append("photo", draft.photo);
+
+      const res = await fetch("/api/items", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Ошибка сохранения");
+      return data;
+    }
+
+    const res = await fetch("/api/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Ошибка сохранения");
+    return data;
   }
 
   async function handleSave() {
@@ -127,20 +186,9 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/items/batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locationId: locId,
-          items: selected.map((d) => ({
-            name: d.name.trim(),
-            quantity: parseFloat(d.quantity.replace(",", ".")) || 1,
-          })),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Ошибка сохранения");
-
+      for (const draft of selected) {
+        await createItem(draft, locId);
+      }
       router.push(`/locations/${locId}`);
       router.refresh();
     } catch (err) {
@@ -148,6 +196,12 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleBackToPhotos() {
+    revokeDraftPhotos(drafts);
+    setStep("photos");
+    setDrafts([]);
   }
 
   const selectedCount = drafts.filter((d) => d.selected && d.name.trim()).length;
@@ -158,8 +212,8 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
 
       <div className="mx-auto max-w-lg space-y-4 px-4 py-4 md:px-8">
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Сфотографируйте полку или стол — появится список предметов. Проверьте и отметьте, что добавить в это
-          место.
+          Сфотографируйте полку или стол — появится список предметов. Уточните название, количество,
+          описание, фото или иконку перед добавлением.
         </p>
 
         {step === "photos" && (
@@ -238,66 +292,30 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
               <button
                 type="button"
                 className="text-sm text-primary hover:underline"
-                onClick={() => {
-                  setStep("photos");
-                  setDrafts([]);
-                }}
+                onClick={handleBackToPhotos}
               >
                 Другие фото
               </button>
             </div>
 
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {drafts.map((d) => (
-                <li
+                <ScanItemDraftCard
                   key={d.id}
-                  className={cn(
-                    "rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-800",
-                    !d.selected && "opacity-60"
-                  )}
-                >
-                  <div className="flex items-start gap-2">
-                    <button
-                      type="button"
-                      onClick={() => updateDraft(d.id, { selected: !d.selected })}
-                      className={cn(
-                        "mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border",
-                        d.selected
-                          ? "border-primary bg-primary text-white"
-                          : "border-slate-300 dark:border-slate-500"
-                      )}
-                      aria-label={d.selected ? "Снять выбор" : "Выбрать"}
-                    >
-                      {d.selected && <Check className="h-3.5 w-3.5" />}
-                    </button>
-                    <div className="min-w-0 flex-1 space-y-2">
-                      <Input
-                        label="Название"
-                        value={d.name}
-                        onChange={(e) => updateDraft(d.id, { name: e.target.value })}
-                      />
-                      <Input
-                        label="Количество"
-                        type="text"
-                        inputMode="decimal"
-                        value={d.quantity}
-                        onChange={(e) => updateDraft(d.id, { quantity: e.target.value })}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeDraft(d.id)}
-                      className="shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-red-500 dark:hover:bg-slate-700"
-                      aria-label="Убрать из списка"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </li>
+                  draft={d}
+                  onChange={(patch) => updateDraft(d.id, patch)}
+                  onRemove={() => removeDraft(d.id)}
+                />
               ))}
             </ul>
 
-            <Button type="button" size="lg" className="w-full" disabled={saving || selectedCount === 0} onClick={handleSave}>
+            <Button
+              type="button"
+              size="lg"
+              className="w-full"
+              disabled={saving || selectedCount === 0}
+              onClick={handleSave}
+            >
               {saving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -10,6 +10,7 @@ import { DEFAULT_COLOR_SCHEME, parseColorScheme } from "@/lib/color-scheme";
 import { OfflineSyncProvider } from "@/components/OfflineSyncProvider";
 import { ThemeBootstrap } from "@/components/ThemeBootstrap";
 import { OfflineAwareLayout } from "@/components/OfflineAwareLayout";
+import { OnboardingProvider } from "@/components/OnboardingProvider";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -43,14 +44,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const userId = await getCurrentUserId();
   let initialTheme = DEFAULT_APP_THEME;
   let initialColorScheme = DEFAULT_COLOR_SCHEME;
+  let showOnboarding = false;
 
   if (userId) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { appTheme: true, appColorScheme: true },
+      select: { appTheme: true, appColorScheme: true, onboardingCompleted: true },
     });
     initialTheme = parseAppTheme(user?.appTheme);
     initialColorScheme = parseColorScheme(user?.appColorScheme);
+    showOnboarding = user ? !user.onboardingCompleted : false;
   }
 
   return (
@@ -66,16 +69,31 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-dvh overflow-x-hidden">
         <ThemeProvider initialTheme={initialTheme} initialColorScheme={initialColorScheme}>
           <OfflineSyncProvider>
-            <OfflineAwareLayout>
-              <SwipeBackHandler />
-              <ServiceWorkerRegister />
-              <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
-                <Sidebar />
-                <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
-                  <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+            {userId ? (
+              <OnboardingProvider initialShow={showOnboarding}>
+                <OfflineAwareLayout>
+                  <SwipeBackHandler />
+                  <ServiceWorkerRegister />
+                  <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
+                    <Sidebar />
+                    <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+                      <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+                    </div>
+                  </div>
+                </OfflineAwareLayout>
+              </OnboardingProvider>
+            ) : (
+              <OfflineAwareLayout>
+                <SwipeBackHandler />
+                <ServiceWorkerRegister />
+                <div className="flex min-h-dvh min-w-0 w-full max-w-full overflow-x-hidden">
+                  <Sidebar />
+                  <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+                    <main className="min-w-0 flex-1 overflow-x-hidden">{children}</main>
+                  </div>
                 </div>
-              </div>
-            </OfflineAwareLayout>
+              </OfflineAwareLayout>
+            )}
           </OfflineSyncProvider>
         </ThemeProvider>
       </body>

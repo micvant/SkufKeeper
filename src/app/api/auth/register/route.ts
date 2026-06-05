@@ -34,7 +34,11 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(password);
     const user = await prisma.$transaction(async (tx) => {
       const created = await tx.user.create({
-        data: { email: normalizedEmail, passwordHash },
+        data: {
+          email: normalizedEmail,
+          passwordHash,
+          onboardingCompleted: false,
+        },
         select: { id: true, email: true },
       });
 

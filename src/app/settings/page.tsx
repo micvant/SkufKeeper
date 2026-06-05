@@ -9,7 +9,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CustomFieldDefinitionsEditor } from "@/components/CustomFieldDefinitionsEditor";
 import { BackupSettings } from "@/components/BackupSettings";
+import { dispatchOpenOnboarding } from "@/components/OnboardingProvider";
 import { useRouter } from "next/navigation";
+import { BookOpen } from "lucide-react";
 
 export default function SettingsPage() {
   const { theme, colorScheme, setTheme, setColorScheme, saving } = useAppTheme();
@@ -117,6 +119,22 @@ export default function SettingsPage() {
         />
 
         <BackupSettings />
+
+        <section>
+          <h2 className="text-sm font-medium text-slate-700">Инструкция</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Краткий обзор возможностей приложения — места, объекты, QR, поиск и ИИ
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            className="mt-3 w-full sm:w-auto"
+            onClick={() => dispatchOpenOnboarding()}
+          >
+            <BookOpen className="h-4 w-4" />
+            Показать инструкцию
+          </Button>
+        </section>
 
         <section>
           <h2 className="text-sm font-medium text-slate-700">Аккаунт</h2>

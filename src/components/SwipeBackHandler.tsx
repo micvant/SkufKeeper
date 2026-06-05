@@ -34,6 +34,7 @@ export function SwipeBackHandler() {
       tracking = false;
 
       if (dx >= MIN_SWIPE_PX && dy < 80) {
+        if (typeof window !== "undefined" && window.__skufHandleBack?.()) return;
         router.back();
       }
     }

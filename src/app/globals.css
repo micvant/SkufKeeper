@@ -280,3 +280,27 @@ nextjs-portal,
     font-size: 16px !important;
   }
 }
+
+.sk-date-field {
+  width: 100%;
+  max-width: 100%;
+}
+
+.sk-date-input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.sk-date-input::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+
+[data-color-scheme="dark"] .sk-date-input {
+  color-scheme: dark;
+}

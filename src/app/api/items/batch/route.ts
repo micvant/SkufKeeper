@@ -7,6 +7,8 @@ type BatchItemInput = {
   name?: string;
   quantity?: number;
   unit?: string;
+  description?: string | null;
+  iconName?: string | null;
 };
 
 export async function POST(request: NextRequest) {
@@ -47,10 +49,20 @@ export async function POST(request: NextRequest) {
           quantity = Math.max(0.001, row.quantity);
         }
         const unit = parseItemUnit(row.unit ?? DEFAULT_ITEM_UNIT);
-        return { name, quantity, unit };
+        const description = row.description?.trim() || null;
+        const iconName = row.iconName?.trim() || null;
+        return { name, quantity, unit, description, iconName };
       })
-      .filter((row): row is { name: string; quantity: number; unit: ReturnType<typeof parseItemUnit> } =>
-        Boolean(row)
+      .filter(
+        (
+          row
+        ): row is {
+          name: string;
+          quantity: number;
+          unit: ReturnType<typeof parseItemUnit>;
+          description: string | null;
+          iconName: string | null;
+        } => Boolean(row)
       );
 
     if (prepared.length === 0) {
@@ -62,9 +74,11 @@ export async function POST(request: NextRequest) {
         prisma.item.create({
           data: {
             name: row.name,
+            description: row.description,
             locationId,
             quantity: row.quantity,
             unit: row.unit,
+            iconName: row.iconName,
             userId,
           },
           select: {
