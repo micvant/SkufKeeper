@@ -58,7 +58,7 @@ npm run dev
    ```
    (URL возьмите из **Settings → Networking → Public URL**)
 
-   **Распознавание по фото (РФ):** [console.cloud.yandex.ru](https://console.cloud.yandex.ru/) → сервис **Yandex AI** / Foundation Models → API-ключ и ID каталога (`folder_id`). В каталоге включите доступ к моделям; для фото используется `gemma-3-27b-it`.
+   **Распознавание по фото (РФ):** [console.cloud.yandex.ru](https://console.cloud.yandex.ru/) → **AI Studio** → API-ключ и ID каталога (`folder_id`). Для фото по умолчанию модель **Qwen3.6 35B** (`qwen3.6-35b-a3b`); YandexGPT 5.1 — только текст.
 
    Альтернатива: `GEMINI_API_KEY` из [aistudio.google.com/apikey](https://aistudio.google.com/apikey), если доступен в вашем регионе.
 4. **Удалите** кастомный Start Command в UI — используется `railway.toml`

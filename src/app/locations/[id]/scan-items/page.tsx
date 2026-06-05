@@ -163,7 +163,7 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
             Распознавание по фото
           </p>
           <p className="mt-1 text-slate-600 dark:text-slate-300">
-            Сфотографируйте полку или стол — Yandex GPT (или Gemini, если настроен) предложит список предметов.
+            Сфотографируйте полку или стол — Yandex AI (Qwen3.6, картинки) предложит список предметов.
             Проверьте и отметьте, что добавить в это место.
           </p>
         </div>

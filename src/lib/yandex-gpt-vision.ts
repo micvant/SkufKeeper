@@ -7,7 +7,8 @@ import {
 } from "@/lib/ai-recognize-shared";
 
 const DEFAULT_BASE_URL = "https://ai.api.cloud.yandex.net/v1";
-const DEFAULT_VISION_MODEL = "gemma-3-27b-it";
+/** Мультимодальная модель в AI Studio (картинки + текст). См. «Популярные модели» → Qwen3.6 35B */
+const DEFAULT_VISION_MODEL = "qwen3.6-35b-a3b";
 
 export function getYandexVisionModel(): string {
   return process.env.YANDEX_VISION_MODEL?.trim() || DEFAULT_VISION_MODEL;
