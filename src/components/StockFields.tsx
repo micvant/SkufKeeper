@@ -17,7 +17,7 @@ export function StockFields({
   onExpiresAtChange,
 }: StockFieldsProps) {
   return (
-    <div className="min-w-0 max-w-full space-y-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-800/50">
+    <div className="min-w-0 max-w-full space-y-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-600 dark:bg-slate-800/50">
       <p className="text-sm font-medium text-slate-700">Запасы</p>
       <Input
         label="Минимальный остаток (необязательно)"
