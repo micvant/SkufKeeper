@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestUserId } from "@/lib/auth";
 import { AI_MAX_PHOTOS } from "@/lib/ai-constants";
-import { isAiRecognizeConfigured, recognizeItemsFromFiles, resolveAiProvider } from "@/lib/ai-recognize";
+import { asVisionUpload, type VisionUpload } from "@/lib/ai-recognize-shared";
+import { isAiRecognizeConfigured, recognizeItemsFromFiles } from "@/lib/ai-recognize";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-function collectPhotos(formData: FormData): File[] {
-  const fromArray = formData.getAll("photos").filter((f): f is File => f instanceof File && f.size > 0);
-  if (fromArray.length > 0) return fromArray;
+function collectPhotos(formData: FormData): VisionUpload[] {
+  const files: VisionUpload[] = [];
+  for (const entry of formData.getAll("photos")) {
+    const blob = asVisionUpload(entry);
+    if (blob) files.push(blob);
+  }
+  if (files.length > 0) return files;
 
-  const single = formData.get("photo");
-  if (single instanceof File && single.size > 0) return [single];
+  const single = asVisionUpload(formData.get("photo"));
+  if (single) return [single];
   return [];
 }
 
@@ -25,8 +30,7 @@ export async function POST(request: NextRequest) {
     if (!isAiRecognizeConfigured()) {
       return NextResponse.json(
         {
-          error:
-            "Распознавание не настроено. Для России: YANDEX_API_KEY и YANDEX_FOLDER_ID (Yandex Cloud). Или GEMINI_API_KEY.",
+          error: "Распознавание по фото временно недоступно.",
         },
         { status: 503 }
       );
@@ -43,16 +47,18 @@ export async function POST(request: NextRequest) {
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json({ error: "Файл слишком большой (максимум 10 МБ)" }, { status: 400 });
       }
+      const mime = file.type || "";
+      const fileName = "name" in file && typeof file.name === "string" ? file.name : "";
       const okType =
-        ALLOWED_TYPES.includes(file.type) || Boolean(file.name.match(/\.(jpe?g|png|webp|gif|heic|heif)$/i));
+        ALLOWED_TYPES.includes(mime) ||
+        Boolean(fileName.match(/\.(jpe?g|png|webp|gif|heic|heif)$/i));
       if (!okType) {
         return NextResponse.json({ error: "Неподдерживаемый формат изображения" }, { status: 400 });
       }
     }
 
     const items = await recognizeItemsFromFiles(files);
-    const provider = resolveAiProvider();
-    return NextResponse.json({ items, provider });
+    return NextResponse.json({ items });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Ошибка распознавания";
     return NextResponse.json({ error: message }, { status: 500 });

@@ -5,6 +5,24 @@ export type RecognizedItem = {
   quantity: number;
 };
 
+/** Blob/File из FormData на сервере (без глобального File в старых Node). */
+export type VisionUpload = Blob;
+
+export function isVisionUpload(value: FormDataEntryValue | null): boolean {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "arrayBuffer" in value &&
+    typeof (value as Blob).arrayBuffer === "function" &&
+    typeof (value as Blob).size === "number" &&
+    (value as Blob).size > 0
+  );
+}
+
+export function asVisionUpload(value: FormDataEntryValue | null): VisionUpload | null {
+  return isVisionUpload(value) ? (value as VisionUpload) : null;
+}
+
 export const RECOGNIZE_PROMPT = `На фотографиях предметы домашнего инвентаря (инструменты, посуда, продукты, техника, расходники).
 Перечисли отдельные физические предметы, которые можно учесть на складе.
 Ответ строго в JSON без markdown:
@@ -16,7 +34,7 @@ export const RECOGNIZE_PROMPT = `На фотографиях предметы д
 - если предметов нет — {"items":[]};
 - не добавляй комментарии вне JSON.`;
 
-export async function prepareImageForVision(file: File): Promise<{ mimeType: string; base64: string }> {
+export async function prepareImageForVision(file: VisionUpload): Promise<{ mimeType: string; base64: string }> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const out = await sharp(buffer)
     .rotate()

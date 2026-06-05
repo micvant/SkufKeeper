@@ -1,4 +1,4 @@
-import type { RecognizedItem } from "@/lib/ai-recognize-shared";
+import type { RecognizedItem, VisionUpload } from "@/lib/ai-recognize-shared";
 import { recognizeItemsFromFiles as recognizeWithGemini, isGeminiConfigured } from "@/lib/gemini-vision";
 import { isYandexGptConfigured, recognizeItemsWithYandex } from "@/lib/yandex-gpt-vision";
 
@@ -18,16 +18,10 @@ export function isAiRecognizeConfigured(): boolean {
   return resolveAiProvider() !== null;
 }
 
-export function getAiProviderLabel(provider: AiProvider): string {
-  return provider === "yandex" ? "Yandex GPT" : "Google Gemini";
-}
-
-export async function recognizeItemsFromFiles(files: File[]): Promise<RecognizedItem[]> {
+export async function recognizeItemsFromFiles(files: VisionUpload[]): Promise<RecognizedItem[]> {
   const provider = resolveAiProvider();
   if (!provider) {
-    throw new Error(
-      "Распознавание не настроено. Задайте YANDEX_API_KEY и YANDEX_FOLDER_ID (РФ) или GEMINI_API_KEY."
-    );
+    throw new Error("Распознавание по фото не настроено.");
   }
   if (provider === "yandex") return recognizeItemsWithYandex(files);
   return recognizeWithGemini(files);

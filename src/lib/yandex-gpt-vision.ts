@@ -4,6 +4,7 @@ import {
   prepareImageForVision,
   RECOGNIZE_PROMPT,
   type RecognizedItem,
+  type VisionUpload,
 } from "@/lib/ai-recognize-shared";
 
 const DEFAULT_BASE_URL = "https://ai.api.cloud.yandex.net/v1";
@@ -45,7 +46,7 @@ function extractResponseText(data: Record<string, unknown>): string {
   return text;
 }
 
-export async function recognizeItemsWithYandex(files: File[]): Promise<RecognizedItem[]> {
+export async function recognizeItemsWithYandex(files: VisionUpload[]): Promise<RecognizedItem[]> {
   const apiKey = process.env.YANDEX_API_KEY?.trim();
   const folderId = process.env.YANDEX_FOLDER_ID?.trim();
   if (!apiKey || !folderId) {

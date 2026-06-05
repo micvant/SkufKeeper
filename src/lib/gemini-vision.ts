@@ -4,6 +4,7 @@ import {
   prepareImageForVision,
   RECOGNIZE_PROMPT,
   type RecognizedItem,
+  type VisionUpload,
 } from "@/lib/ai-recognize-shared";
 
 const DEFAULT_MODEL = "gemini-2.0-flash";
@@ -18,7 +19,7 @@ export function isGeminiConfigured(): boolean {
   return Boolean(process.env.GEMINI_API_KEY?.trim());
 }
 
-export async function recognizeItemsFromFiles(files: File[]): Promise<RecognizedItem[]> {
+export async function recognizeItemsFromFiles(files: VisionUpload[]): Promise<RecognizedItem[]> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY не задан. Добавьте ключ в переменные окружения.");

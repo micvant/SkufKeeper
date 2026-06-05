@@ -157,16 +157,10 @@ export default function ScanItemsPage({ params }: { params: Promise<{ id: string
       <Header title="Добавить по фото" backHref={backHref} />
 
       <div className="mx-auto max-w-lg space-y-4 px-4 py-4 md:px-8">
-        <div className="rounded-xl border border-primary/20 bg-primary-light/50 px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
-          <p className="inline-flex items-center gap-2 font-medium text-primary-foreground">
-            <Sparkles className="h-4 w-4 shrink-0" />
-            Распознавание по фото
-          </p>
-          <p className="mt-1 text-slate-600 dark:text-slate-300">
-            Сфотографируйте полку или стол — Yandex AI (Qwen3.6, картинки) предложит список предметов.
-            Проверьте и отметьте, что добавить в это место.
-          </p>
-        </div>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Сфотографируйте полку или стол — появится список предметов. Проверьте и отметьте, что добавить в это
+          место.
+        </p>
 
         {step === "photos" && (
           <>

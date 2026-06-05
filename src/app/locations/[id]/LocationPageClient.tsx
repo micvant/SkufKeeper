@@ -356,7 +356,7 @@ export function LocationPageClient({
                 <Link href={`/locations/${id}/scan-items`}>
                   <Button size="sm" variant="secondary" title="Добавить по фото (ИИ)">
                     <Sparkles className="h-4 w-4" />
-                    <span className="hidden sm:inline">По фото</span>
+                    <span className="hidden sm:inline">По фото (ИИ)</span>
                   </Button>
                 </Link>
                 <Link href={`/locations/${id}/items/new`}>
